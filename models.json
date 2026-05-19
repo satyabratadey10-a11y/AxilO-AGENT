@@ -1,0 +1,55 @@
+[
+  {
+    "name": "Gemini 3 Flash",
+    "api": "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
+    "apiKey": "REMOVED",
+    "modelId": "gemini-3-flash-preview",
+    "extraParams": {
+      "temperature": 1,
+      "max_tokens": 5000
+    }
+  },
+  {
+    "name": "Gemini 2.5 Flash",
+    "api": "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
+    "apiKey": "REMOVED",
+    "modelId": "gemini-2.5-flash",
+    "extraParams": {
+      "temperature": 1,
+      "max_tokens": 5000
+    }
+  },
+  {
+    "name": "openrouter/kimi2.5",
+    "modelId": "minimax/minimax-m2.5:free",
+    "baseUrl": "https://openrouter.ai/api/v1/chat/completions",
+    "apiKey": "REMOVED"
+  },
+  {
+    "name": "GitHub DeepSeek R1",
+    "modelId": "DeepSeek-R1",
+    "baseUrl": "https://models.github.ai/inference/chat/completions",
+    "apiKey": "REMOVED",
+    "temperature": 1.6,
+    "maxTokens": 18590,
+    "stream": false
+  },
+  {
+    "name": "deepseek/DeepSeek-R1",
+    "modelId": "DeepSeek-R1",
+    "baseUrl": "https://models.github.ai/inference",
+    "apiKey": "REMOVED",
+    "temperature": 1.6,
+    "maxTokens": 5000,
+    "stream": false
+  },
+  {
+    "name": "GitHub DeepSeek R1",
+    "modelId": "DeepSeek-R1",
+    "baseUrl": "https://models.inference.ai.azure.com/chat/completions",
+    "apiKey": "REMOVED",
+    "temperature": 1.6,
+    "maxTokens": 5000,
+    "stream": false
+  }
+]

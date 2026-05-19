@@ -1,0 +1,11 @@
+{
+  "template_name": "Auto Scene Chopper",
+  "description": "Analyzes a video for camera cuts and automatically splits it into separate clips based on those scenes.",
+  "required_materials": ["1x Video File (.mp4)"],
+  "ffmpeg_logic": {
+    "step_1": "Run the scan_video_scenes tool on the provided video to get the exact timestamps of camera cuts.",
+    "step_2": "Calculate the duration of the first 3 scenes using the timestamps. (e.g., Scene 1 is 0 to timestamp_1, Scene 2 is timestamp_1 to timestamp_2).",
+    "step_3": "Generate one execute_command that uses ffmpeg to extract these scenes into separate files (e.g., scene_1.mp4, scene_2.mp4, scene_3.mp4). Use the -ss (start time) and -to (end time) flags.",
+    "notes_for_ai": "Do not guess timestamps. You MUST rely strictly on the output of scan_video_scenes. If no cuts are found, inform the user."
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "template_name": "Phonk Beat Sync",
+  "description": "Hard-hitting phonk edit template. Slows down video to match a phonk beat, boosts bass, and adds a hard limiter.",
+  "required_materials": ["1x Video File (.mp4)", "1x Audio File (.wav or .mp3)"],
+  "ffmpeg_logic": {
+    "audio_filter": "bass=g=10:f=50,acompressor=ratio=4,alimiter=limit=-1dB",
+    "video_filter": "setpts=1.5*PTS,eq=contrast=1.2:saturation=1.5",
+    "notes_for_ai": "First use analyze_media to get the duration. Then apply the audio_filter to the music track and the video_filter to the video track, merging them into a final output file."
+  }
+}

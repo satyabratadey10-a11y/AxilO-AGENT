@@ -1,0 +1,10 @@
+{
+  "template_name": "Internet Media Downloader",
+  "description": "Uses yt-dlp to download video or extract audio from internet URLs.",
+  "required_materials": ["1x URL"],
+  "ffmpeg_logic": {
+    "audio_extraction": "To download ONLY audio (for beats/music), use this exact command via execute_command: yt-dlp -x --audio-format wav -o './downloaded_audio.wav' 'URL_HERE'",
+    "video_extraction": "To download video, use this exact command via execute_command: yt-dlp -f 'best[ext=mp4]' -o './downloaded_video.mp4' 'URL_HERE'",
+    "notes_for_ai": "Never run yt-dlp without the -o flag specifying the exact output path. Always use execute_command so the human can approve the network usage."
+  }
+}
