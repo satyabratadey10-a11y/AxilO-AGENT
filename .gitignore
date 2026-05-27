@@ -1,1 +1,27 @@
+# 1. Node Dependencies
+node_modules/
+
+# 2. Build Output
+dist/
+
+# 3. API Keys, Tokens, and Secrets
+models.json
+.env
+*.pem
+*.key
+
+# 4. Agent Runtime Memory & State
 history.json
+sessions.json
+
+# 5. Logs and Debugging
+*.log
+server.log
+npm-debug.log*
+
+# 6. Temporary Scratchpads
+fix_parser.js
+
+# 7. OS Specific
+.DS_Store
+Thumbs.db
