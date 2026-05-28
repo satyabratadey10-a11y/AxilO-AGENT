@@ -83,6 +83,18 @@ The server listens on **http://127.0.0.1:8080** and persists sessions in `sessio
 
 Edit `tools.js` to add or update tool schemas and execution logic. The API server hot-reloads this file on each request so you can iterate without restarting.
 
+## Local data files
+
+AxilO AGENT keeps runtime state in local JSON files that are intentionally gitignored:
+
+- `models.json` — model profiles and API credentials
+- `history.json` — CLI chat history
+- `sessions.json` — API server session storage
+
+## Optional demo UI
+
+The `chat_app/` folder contains a minimal WebSocket demo UI and server for experimentation. It is standalone and not wired to the REST API server.
+
 ## Project layout
 
 | Path | Purpose |
@@ -93,7 +105,7 @@ Edit `tools.js` to add or update tool schemas and execution logic. The API serve
 | `tools.js` | Tool schema + execution registry |
 | `src/` | TypeScript source for the core agent |
 | `dist/` | Compiled runtime output |
-| `chat_app/` | Minimal WebSocket demo UI |
+| `chat_app/` | Standalone WebSocket demo UI |
 
 ## Security notes
 
