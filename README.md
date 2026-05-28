@@ -58,7 +58,7 @@ Start the interactive terminal agent:
 node agent.js
 ```
 
-`agent.js` is the CLI entry point in this repository. (If you previously used `test.js`, use `agent.js` here.) It loads your model profiles, prompts you to select a model, and stores chat history in `history.json`.
+`agent.js` is the CLI entry point in this repository. It loads your model profiles, prompts you to select a model, and stores chat history in `history.json`.
 
 ## Run the headless API server
 
