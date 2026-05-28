@@ -58,7 +58,7 @@ Start the interactive terminal agent:
 node agent.js
 ```
 
-`agent.js` (in the repository root) is the CLI entry point. It loads your model profiles, prompts you to select a model, and stores chat history in `history.json`.
+This repository includes `agent.js` in the root as the CLI entry point. It loads your model profiles, prompts you to select a model, and stores chat history in `history.json`.
 
 ## Run the headless API server
 
@@ -93,7 +93,7 @@ AxilO AGENT keeps runtime state in local JSON files that are intentionally gitig
 
 ## Optional demo UI
 
-The `chat_app/` folder contains a minimal WebSocket demo UI and server for experimentation. It is standalone and not wired to the REST API server. To try it, run `node chat_app/server.js` and open `chat_app/index.html` in a browser. Note: the demo server also binds to port 8080. Stop the REST API server or change one of the ports to avoid conflicts.
+The `chat_app/` folder contains a minimal WebSocket demo UI and server for experimentation. It is standalone and not wired to the REST API server. To try it, run `node chat_app/server.js` and open `chat_app/index.html` in a browser. Note: the demo server also binds to port 8080. Stop the REST API server or change one of the ports to avoid conflicts. Update `server.js` for the REST API port or `chat_app/server.js` for the demo port.
 
 ## Project layout
 
