@@ -24,8 +24,8 @@ AxilO AGENT is a Node.js + TypeScript AI agent runtime designed for terminal-fir
 ```bash
 git clone https://github.com/satyabratadey10-a11y/TUF-AGENT.git
 cd TUF-AGENT
-chmod +x setup.sh
-./setup.sh
+chmod +x AxilO
+./AxilO
 ```
 
 ### Manual setup
