@@ -7,23 +7,28 @@ RED='\033[31m'
 GREEN='\033[32m'
 NC='\033[0m'
 
+APP_NAME="AxilO AGENT"
+LOG_PREFIX="[AxilO]"
+
 log() {
-    echo -e "${CYAN}[TUF-AGENT] $1${NC}"
+    echo -e "${CYAN}${LOG_PREFIX} $1${NC}"
 }
 
 warn() {
-    echo -e "${YELLOW}[TUF-AGENT] $1${NC}"
+    echo -e "${YELLOW}${LOG_PREFIX} $1${NC}"
 }
 
 fail() {
-    echo -e "${RED}[TUF-AGENT] $1${NC}"
+    echo -e "${RED}${LOG_PREFIX} $1${NC}"
     exit 1
 }
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "${SCRIPT_DIR}"
 
-log "Starting setup in ${SCRIPT_DIR}"
+UPGRADE_FLAG="${AXILO_SETUP_UPGRADE:-${TUF_SETUP_UPGRADE:-0}}"
+
+log "Starting ${APP_NAME} setup in ${SCRIPT_DIR}"
 
 ensure_node_runtime() {
     if command -v node >/dev/null 2>&1 && command -v npm >/dev/null 2>&1; then
@@ -34,10 +39,10 @@ ensure_node_runtime() {
     if command -v pkg >/dev/null 2>&1; then
         warn "Termux detected. Installing Node.js..."
         pkg update -y
-        if [ "${TUF_SETUP_UPGRADE:-0}" = "1" ]; then
+        if [ "${UPGRADE_FLAG}" = "1" ]; then
             pkg upgrade -y
         else
-            warn "Skipping full Termux upgrade (set TUF_SETUP_UPGRADE=1 to enable)."
+            warn "Skipping full Termux upgrade (set AXILO_SETUP_UPGRADE=1 to enable)."
         fi
         pkg install -y nodejs
     elif command -v apt-get >/dev/null 2>&1; then
@@ -145,6 +150,7 @@ log "Initializing local data files..."
 ensure_json_array_file "./models.json"
 ensure_json_array_file "./sessions.json"
 
-echo -e "${GREEN}[TUF-AGENT] Setup complete.${NC}"
+echo -e "${GREEN}${LOG_PREFIX} Setup complete.${NC}"
 echo "Step 1: node add_model.js"
-echo "Step 2: node test.js"
+echo "Step 2: node agent.js"
+echo "Optional: node server.js"
