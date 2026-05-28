@@ -46,7 +46,7 @@ class Spinner {
         if (this.timer) return;
         process.stdout.write("\x1B[?25l"); 
         this.timer = setInterval(() => {
-            const spinStr = `${colors.cyan}${this.frames[this.idx]}${colors.reset} ${colors.magenta}${colors.dim}${this.text}...${colors.reset}`;
+            const spinStr = `${colors.cyan}${this.frames[this.idx]}${colors.reset} ${colors.cyan}${colors.dim}${this.text}...${colors.reset}`;
             readline.clearLine(process.stdout, 0);
             readline.cursorTo(process.stdout, 0);
             process.stdout.write(`${spinStr}  |  ${colors.bold}${colors.cyan}❯ You:${colors.reset} ${rl.line}`);
@@ -203,9 +203,9 @@ async function handleSlashCommand(cmd) {
         const wasSpinning = spinner.timer !== null;
         if (wasSpinning) spinner.stop(true);
         
-        sysLog(`\n${colors.magenta}+-- 💬 BTW Question -----------------------${colors.reset}`);
-        sysLog(`${colors.magenta}|${colors.reset} ${question}`);
-        sysLog(`${colors.magenta}\\----------------------------------------${colors.reset}`);
+        sysLog(`\n${colors.cyan}+-- 💬 BTW Question -----------------------${colors.reset}`);
+        sysLog(`${colors.cyan}|${colors.reset} ${question}`);
+        sysLog(`${colors.cyan}\\----------------------------------------${colors.reset}`);
         sysLog(`${colors.dim}Thinking... (Task execution continues in background)${colors.reset}`);
         
         if (wasSpinning) spinner.start();
@@ -221,9 +221,9 @@ async function handleSlashCommand(cmd) {
                 const parsed = safeJsonParse(cleanSideResponse);
                 if (parsed && parsed.result) cleanSideResponse = parsed.result;
             }
-            sysLog(`\n${colors.bold}${colors.magenta}+-- ◆ BTW Answer ------------------------${colors.reset}`);
-            await sysLogAnimated(cleanSideResponse, `${colors.magenta}|${colors.reset} `);
-            sysLog(`${colors.bold}${colors.magenta}\\----------------------------------------${colors.reset}\n`);
+            sysLog(`\n${colors.bold}${colors.cyan}+-- ◆ BTW Answer ------------------------${colors.reset}`);
+            await sysLogAnimated(cleanSideResponse, `${colors.cyan}|${colors.reset} `);
+            sysLog(`${colors.bold}${colors.cyan}\\----------------------------------------${colors.reset}\n`);
             if (isNowSpinning) spinner.start();
         }).catch(err => {
             const isNowSpinning = spinner.timer !== null;
@@ -267,9 +267,16 @@ async function handleSlashCommand(cmd) {
 
 async function loadConfig() {
     console.clear();
-    console.log(`${colors.bold}${colors.magenta}┌──────────────────────────────────────────┐${colors.reset}`);
-    console.log(`${colors.bold}${colors.magenta}│       AUTONOMOUS AGENT STUDIO v10.7      │${colors.reset}`);
-    console.log(`${colors.bold}${colors.magenta}└──────────────────────────────────────────┘${colors.reset}\n`);
+    console.log(`${colors.bold}${colors.cyan}┌──────────────────────────────────────────────────────────────┐${colors.reset}`);
+    console.log(`${colors.bold}${colors.cyan}│                                                              │${colors.reset}`);
+    console.log(`${colors.bold}${colors.cyan}│                                                              │${colors.reset}`);
+    console.log(`${colors.bold}${colors.cyan}│          ┌─┐        _  │    ╭───╮                            │${colors.reset}`);
+    console.log(`${colors.bold}${colors.cyan}│          ├─┤  ╲  ╱  │  │    │   │                            │${colors.reset}`);
+    console.log(`${colors.bold}${colors.cyan}│          │ │   ╳    │  │    │   │                            │${colors.reset}`);
+    console.log(`${colors.bold}${colors.cyan}│          │ │  ╱  ╲  │  └─── ╰───╯  v1.0                      │${colors.reset}`);
+    console.log(`${colors.bold}${colors.cyan}│                                                              │${colors.reset}`);
+    console.log(`${colors.bold}${colors.cyan}│                                                              │${colors.reset}`);
+    console.log(`${colors.bold}${colors.cyan}└──────────────────────────────────────────────────────────────┘${colors.reset}\n`);
     try { availableModels = _originalParse(fs.readFileSync('models.json', 'utf8')); } catch(e) {
         console.log(`${colors.yellow}⚠️ models.json not found. Run 'node add_model.js' first.${colors.reset}`);
         process.exit(1);
