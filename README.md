@@ -1,49 +1,25 @@
-# TUF-AGENT (ai-agent-shd)
+# AxilO AGENT
 
-TUF-AGENT is a Node.js + TypeScript multi-agent CLI runtime for Termux/Linux.  
-It supports model profile management, session persistence, dynamic tool loading, and optional MCP tool integration.
+AxilO AGENT is a Node.js + TypeScript AI agent runtime designed for terminal-first workflows and headless integrations. It provides a polished CLI experience, model profile management, session persistence, and a pluggable tool system so you can build and operate tool-using assistants locally or behind an API.
 
-## What this project does
+## Highlights
 
-1. Runs an interactive AI agent (`node test.js`).
-2. Lets you register multiple model endpoints (`node add_model.js`).
-3. Saves chat memory/session history locally (`sessions.json`).
-4. Supports tool calls with human approval gates for sensitive actions.
-5. Can load external MCP tools from `mcp.json`.
+- **Interactive CLI** with guided prompts, slash commands, and local history persistence.
+- **Headless REST API** for embedding the agent in other services.
+- **Model profiles** stored locally (no hard-coded credentials).
+- **Extensible tools** in `tools.js` with safe execution gates.
+- **TypeScript core** in `src/` compiled to `dist/` for runtime stability.
 
 ## Requirements
 
-### Core runtime
-
 - Node.js 18+
 - npm
-- TypeScript compiler (installed via project dev dependencies)
-
-### Python runtime (requested)
-
-- Python 3
-- pip / pip3
-- `requests` package
-
-The repository includes `requirements.txt` for Python dependencies.
-
-## Dependencies in this project
-
-### Node dependencies (`package.json`)
-
-| Package | Type | Purpose |
-|---|---|---|
-| `@modelcontextprotocol/sdk` | dependency | MCP client integration |
-| `typescript` | devDependency | Compile `src/*.ts` to `dist/*.js` |
-| `@types/node` | devDependency | Node type definitions for TypeScript |
-
-### Python dependencies (`requirements.txt`)
-
-| Package | Purpose |
-|---|---|
-| `requests` | HTTP client for Python-side extensions/scripts |
+- Python 3 + pip (optional, for helper scripts such as `litert_engine.py`)
+- ffmpeg/ffprobe (optional, for media tools exposed by `tools.js`)
 
 ## Installation
+
+### Automated setup
 
 ```bash
 git clone https://github.com/satyabratadey10-a11y/TUF-AGENT.git
@@ -52,22 +28,7 @@ chmod +x setup.sh
 ./setup.sh
 ```
 
-### What `setup.sh` does
-
-1. Ensures Node.js + npm are available (installs if missing where possible).
-2. Ensures Python 3 + pip are available (installs if missing where possible).
-3. Installs Node dependencies (`npm install`).
-4. Installs Python dependencies (`pip install -r requirements.txt`).
-5. Compiles TypeScript to `dist/`.
-6. Initializes/repairs `models.json` and `sessions.json` as JSON arrays.
-7. If those JSON files are invalid, it backs them up to `*.bak.<timestamp>` before reset.
-
-### Setup flags
-
-- `TUF_SETUP_UPGRADE=1 ./setup.sh`  
-  Enables full `pkg upgrade` on Termux before installing runtime packages.
-
-## Manual setup (without `setup.sh`)
+### Manual setup
 
 ```bash
 npm install
@@ -75,100 +36,72 @@ npx tsc
 python3 -m pip install -r requirements.txt
 ```
 
-## Usage
+## Configure a model profile
 
-### 1. Add one or more model profiles
+Run the profile wizard to create `models.json`:
 
 ```bash
 node add_model.js
 ```
 
-You will be asked for:
-- Display name
-- API endpoint
-- Internal model ID
-- API key (optional)
-- Optional generation settings
-
-### 2. Start agent runtime
+You can remove profiles with:
 
 ```bash
-node test.js
+node del_model.js
 ```
 
-Main flow in runtime:
-1. Select model profile.
-2. Start new or resume previous session.
-3. Chat with the agent.
-4. Type `exit` to quit.
+## Run the CLI
 
-## Optional MCP integration
+Start the interactive terminal agent:
 
-Create `mcp.json` in project root:
-
-```json
-{
-  "command": "npx",
-  "args": ["-y", "@modelcontextprotocol/server-filesystem", "."]
-}
+```bash
+node agent.js
 ```
 
-When this file exists, `test.js` starts MCP client transport, loads external tools, and routes matching tool calls to MCP.
+The CLI loads your model profiles, prompts you to select a model, and stores chat history in `history.json`.
 
-## File-by-file guide (what each file does)
+## Run the headless API server
 
-### Top-level files
+Build the TypeScript sources (if you have not already):
 
-| File | Purpose | When to use/edit |
-|---|---|---|
-| `setup.sh` | Bootstrap script for runtime/toolchain setup | First install, environment repair |
-| `README.md` | Project documentation | Usage/setup/reference updates |
-| `package.json` | Node metadata + dependencies | Add/remove JS/TS packages |
-| `package-lock.json` | Locked Node dependency tree | Auto-updated after npm install/update |
-| `requirements.txt` | Python dependency list | Add/remove Python packages |
-| `tsconfig.json` | TypeScript compiler config | Build target/module/output settings |
-| `add_model.js` | CLI to create/update model profiles | Configure model endpoints |
-| `test.js` | Main interactive host app | Run the agent locally |
-| `tools.js` | Dynamic native tools exposed to the agent | Add custom tools/capabilities |
-| `models.json` | Local model profiles (private) | Stored credentials/config |
-| `sessions.json` | Local chat/session memory (private) | Resume chat history |
-| `mcp.json` (optional) | External MCP server config | Enable external MCP tools |
+```bash
+npx tsc
+```
 
-### Source files (`src/`)
+Start the API server:
 
-| File | Purpose |
-|---|---|
-| `src/AIAgentSHD.ts` | Agent loop, memory handling, tool-call orchestration |
-| `src/HttpProvider.ts` | HTTP completion provider + JSON decision parsing/retry handling |
-| `src/ProfileManager.ts` | Read/write model profile store (`models.json`) |
-| `src/SessionManager.ts` | Read/write session store (`sessions.json`) |
-| `src/MCPManager.ts` | MCP client transport, list/execute external tools |
+```bash
+node server.js
+```
 
-### Build output (`dist/`)
+The server listens on **http://127.0.0.1:8080** and persists sessions in `sessions.json`. It exposes:
 
-Compiled JavaScript (`*.js`) and declaration files (`*.d.ts`) generated from `src/`.  
-Runtime entry files (`test.js`, `add_model.js`) import from here.
+- `POST /api/chat` — send a prompt (and optional `sessionId`).
+- `POST /api/approve` — approve or deny tool calls that require human consent.
 
-## Development workflow
+## Customize tools
 
-1. Edit source in `src/` and/or `tools.js`.
-2. Rebuild TypeScript:
-   ```bash
-   npx tsc
-   ```
-3. Run:
-   ```bash
-   node test.js
-   ```
+Edit `tools.js` to add or update tool schemas and execution logic. The API server hot-reloads this file on each request so you can iterate without restarting.
 
-## Security and privacy notes
+## Project layout
 
-- `models.json` and `sessions.json` can contain sensitive data and are intentionally ignored by Git.
-- High-risk actions in runtime (command execution, file write/delete, delegation) require explicit user approval.
+| Path | Purpose |
+| --- | --- |
+| `agent.js` | Interactive CLI runtime |
+| `server.js` | Headless REST API server |
+| `add_model.js` / `del_model.js` | Model profile management |
+| `tools.js` | Tool schema + execution registry |
+| `src/` | TypeScript source for the core agent |
+| `dist/` | Compiled runtime output |
+| `chat_app/` | Minimal WebSocket demo UI |
+
+## Security notes
+
+- `models.json`, `history.json`, and `sessions.json` are intentionally gitignored.
+- Store API keys only in local profile files and rotate them as needed.
 
 ## Troubleshooting
 
-- **No model profiles found:** run `node add_model.js` first.
-- **Build output missing:** run `npx tsc` and ensure `dist/AIAgentSHD.js` exists.
-- **MCP not loading:** check `mcp.json` command/args and ensure the MCP server package is installed.
-- **Python dependency issue:** run `python3 -m pip install -r requirements.txt`.
+- **No profiles found:** run `node add_model.js` first.
+- **Build output missing:** run `npx tsc` and confirm `dist/` exists.
+- **Python tool errors:** install Python dependencies with `python3 -m pip install -r requirements.txt`.
