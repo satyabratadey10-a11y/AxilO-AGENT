@@ -58,7 +58,7 @@ Start the interactive terminal agent:
 node agent.js
 ```
 
-The CLI loads your model profiles, prompts you to select a model, and stores chat history in `history.json`.
+`agent.js` is the CLI entry point in this repository. It loads your model profiles, prompts you to select a model, and stores chat history in `history.json`.
 
 ## Run the headless API server
 
@@ -74,14 +74,14 @@ Start the API server:
 node server.js
 ```
 
-The server listens on **http://127.0.0.1:8080** and persists sessions in `sessions.json`. It exposes:
+`server.js` runs the headless runtime backed by the compiled TypeScript core in `dist/`. The server listens on **http://127.0.0.1:8080** and persists sessions in `sessions.json`. It exposes:
 
 - `POST /api/chat` — send a prompt (and optional `sessionId`).
 - `POST /api/approve` — approve or deny tool calls that require human consent.
 
 ## Customize tools
 
-Edit `tools.js` to add or update tool schemas and execution logic. The API server hot-reloads this file on each request so you can iterate without restarting.
+Edit `tools.js` to add or update tool schemas and execution logic. The API server reloads this file when a tool call executes, and will keep the last valid tool set if a syntax error is detected.
 
 ## Local data files
 
