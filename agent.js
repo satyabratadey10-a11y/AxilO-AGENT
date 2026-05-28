@@ -5,7 +5,7 @@ const { execSync } = require('child_process');
 const tools = require('./tools.js');
 const api = require('./connection.js');
 
-// --- TERMINAL UI ENGINE (CURVED ANSI & STRICT BUFFERING) ---
+// --- TERMINAL UI ENGINE (UNIVERSAL ASCII & ANIMATION) ---
 const colors = { reset: "\x1b[0m", bold: "\x1b[1m", dim: "\x1b[2m", cyan: "\x1b[36m", green: "\x1b[32m", yellow: "\x1b[33m", red: "\x1b[31m", magenta: "\x1b[35m", blue: "\x1b[34m", bgRed: "\x1b[41m", bgYellow: "\x1b[43m" };
 
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
@@ -16,7 +16,6 @@ function sysLog(...args) {
     readline.clearLine(process.stdout, 0);
     readline.cursorTo(process.stdout, 0);
     if (args.length > 0) console.log(...args);
-    // ONLY redraw the prompt if the system is idle. Prevents UI scrolling bugs.
     if (!isProcessing) rl.prompt(true);
 }
 
@@ -50,7 +49,7 @@ class Spinner {
             const spinStr = `${colors.cyan}${this.frames[this.idx]}${colors.reset} ${colors.magenta}${colors.dim}${this.text}...${colors.reset}`;
             readline.clearLine(process.stdout, 0);
             readline.cursorTo(process.stdout, 0);
-            process.stdout.write(`${spinStr}  │  ${colors.bold}${colors.cyan}❯ You:${colors.reset} ${rl.line}`);
+            process.stdout.write(`${spinStr}  |  ${colors.bold}${colors.cyan}❯ You:${colors.reset} ${rl.line}`);
             this.idx = (this.idx + 1) % this.frames.length;
         }, 80);
     }
@@ -62,7 +61,6 @@ class Spinner {
         readline.clearLine(process.stdout, 0);
         readline.cursorTo(process.stdout, 0);
         if (!clearLine) console.log();
-        // Spinner stop does NOT prompt automatically. Let the flow decide.
     }
     update(newText) { this.text = newText; }
 }
@@ -79,6 +77,7 @@ let abortController = new AbortController();
 let pasteBuffer = [];
 let pasteTimer = null;
 
+// --- DECOUPLED SAFE PARSING ENGINE ---
 const _originalParse = JSON.parse;
 function safeJsonParse(text) {
     if (typeof text !== 'string') return null;
@@ -112,10 +111,10 @@ const askToolConfirm = (q) => new Promise(res => {
 });
 
 async function switchModelMenu() {
-    sysLog(`\n${colors.bold}${colors.cyan}╭─ Switch Active Core ───────────────────${colors.reset}`);
+    sysLog(`\n${colors.bold}${colors.cyan}+-- Switch Active Core ------------------${colors.reset}`);
     try { if (fs.existsSync('models.json')) availableModels = _originalParse(fs.readFileSync('models.json', 'utf8')); } catch(e) {}
-    availableModels.forEach((m, i) => sysLog(`${colors.cyan}│${colors.reset}  ${colors.cyan}[${i+1}]${colors.reset} ${m.name}`));
-    sysLog(`${colors.cyan}╰────────────────────────────────────────${colors.reset}`);
+    availableModels.forEach((m, i) => sysLog(`${colors.cyan}|${colors.reset}  ${colors.cyan}[${i+1}]${colors.reset} ${m.name}`));
+    sysLog(`${colors.cyan}\\----------------------------------------${colors.reset}`);
     
     rl.removeListener('line', lineHandler);
     const choice = await askSync(`\nSelect a new core [1-${availableModels.length}] or press Enter to cancel: `);
@@ -130,6 +129,7 @@ async function switchModelMenu() {
     return false;
 }
 
+// --- SWARM TOOLS ---
 const agentTools = [...tools.schemas, 
 { 
     name: 'execute_command', description: 'Execute shell commands on the host OS.', 
@@ -203,9 +203,9 @@ async function handleSlashCommand(cmd) {
         const wasSpinning = spinner.timer !== null;
         if (wasSpinning) spinner.stop(true);
         
-        sysLog(`\n${colors.magenta}╭─ 💬 BTW Question ──────────────────────${colors.reset}`);
-        sysLog(`${colors.magenta}│${colors.reset} ${question}`);
-        sysLog(`${colors.magenta}╰────────────────────────────────────────${colors.reset}`);
+        sysLog(`\n${colors.magenta}+-- 💬 BTW Question -----------------------${colors.reset}`);
+        sysLog(`${colors.magenta}|${colors.reset} ${question}`);
+        sysLog(`${colors.magenta}\\----------------------------------------${colors.reset}`);
         sysLog(`${colors.dim}Thinking... (Task execution continues in background)${colors.reset}`);
         
         if (wasSpinning) spinner.start();
@@ -221,9 +221,9 @@ async function handleSlashCommand(cmd) {
                 const parsed = safeJsonParse(cleanSideResponse);
                 if (parsed && parsed.result) cleanSideResponse = parsed.result;
             }
-            sysLog(`\n${colors.bold}${colors.magenta}╭─ ◆ BTW Answer ─────────────────────────${colors.reset}`);
-            await sysLogAnimated(cleanSideResponse, `${colors.magenta}│${colors.reset} `);
-            sysLog(`${colors.bold}${colors.magenta}╰────────────────────────────────────────${colors.reset}\n`);
+            sysLog(`\n${colors.bold}${colors.magenta}+-- ◆ BTW Answer ------------------------${colors.reset}`);
+            await sysLogAnimated(cleanSideResponse, `${colors.magenta}|${colors.reset} `);
+            sysLog(`${colors.bold}${colors.magenta}\\----------------------------------------${colors.reset}\n`);
             if (isNowSpinning) spinner.start();
         }).catch(err => {
             const isNowSpinning = spinner.timer !== null;
@@ -236,30 +236,30 @@ async function handleSlashCommand(cmd) {
     
     sysLog();
     if (base === '/' || base === '/help') {
-        sysLog(`${colors.bold}${colors.cyan}╭─ Agentic Framework Commands ───────────${colors.reset}`);
-        sysLog(`${colors.cyan}│${colors.reset}  ${colors.green}/btw <q>${colors.reset}   Ask a question mid-session`);
-        sysLog(`${colors.cyan}│${colors.reset}  ${colors.green}/stop${colors.reset}      Interrupt AI processing`);
-        sysLog(`${colors.cyan}│${colors.reset}  ${colors.green}/model${colors.reset}     Hot-swap the AI core`);
-        sysLog(`${colors.cyan}│${colors.reset}  ${colors.green}/settings${colors.reset}  View framework config`);
-        sysLog(`${colors.cyan}│${colors.reset}  ${colors.green}/skills${colors.reset}    View loaded markdown skills`);
-        sysLog(`${colors.cyan}│${colors.reset}  ${colors.green}/clear${colors.reset}     Wipe context memory`);
-        sysLog(`${colors.cyan}│${colors.reset}  ${colors.green}/exit${colors.reset}      Terminate session`);
-        sysLog(`${colors.bold}${colors.cyan}╰────────────────────────────────────────${colors.reset}`);
+        sysLog(`${colors.bold}${colors.cyan}+-- Agentic Framework Commands ----------${colors.reset}`);
+        sysLog(`${colors.cyan}|${colors.reset}  ${colors.green}/btw <q>${colors.reset}   Ask a question mid-session`);
+        sysLog(`${colors.cyan}|${colors.reset}  ${colors.green}/stop${colors.reset}      Interrupt AI processing`);
+        sysLog(`${colors.cyan}|${colors.reset}  ${colors.green}/model${colors.reset}     Hot-swap the AI core`);
+        sysLog(`${colors.cyan}|${colors.reset}  ${colors.green}/settings${colors.reset}  View framework config`);
+        sysLog(`${colors.cyan}|${colors.reset}  ${colors.green}/skills${colors.reset}    View loaded markdown skills`);
+        sysLog(`${colors.cyan}|${colors.reset}  ${colors.green}/clear${colors.reset}     Wipe context memory`);
+        sysLog(`${colors.cyan}|${colors.reset}  ${colors.green}/exit${colors.reset}      Terminate session`);
+        sysLog(`${colors.bold}${colors.cyan}\\----------------------------------------${colors.reset}`);
     } else if (base === '/model') { await switchModelMenu();
     } else if (base === '/settings') {
-        sysLog(`${colors.bold}${colors.cyan}╭─ System Settings ──────────────────────${colors.reset}`);
-        sysLog(`${colors.cyan}│${colors.reset} Engine: ${colors.yellow}${activeModel.name}${colors.reset}`);
-        sysLog(`${colors.cyan}│${colors.reset} Endpoint: ${colors.dim}${activeModel.baseUrl || "Default Google"}${colors.reset}`);
-        sysLog(`${colors.cyan}│${colors.reset} Queue: ${promptQueue.length > 0 ? colors.yellow + promptQueue.length + " pending" : colors.green + "Empty"}${colors.reset}`);
-        sysLog(`${colors.bold}${colors.cyan}╰────────────────────────────────────────${colors.reset}`);
+        sysLog(`${colors.bold}${colors.cyan}+-- System Settings ---------------------${colors.reset}`);
+        sysLog(`${colors.cyan}|${colors.reset} Engine: ${colors.yellow}${activeModel.name}${colors.reset}`);
+        sysLog(`${colors.cyan}|${colors.reset} Endpoint: ${colors.dim}${activeModel.baseUrl || "Default Google"}${colors.reset}`);
+        sysLog(`${colors.cyan}|${colors.reset} Queue: ${promptQueue.length > 0 ? colors.yellow + promptQueue.length + " pending" : colors.green + "Empty"}${colors.reset}`);
+        sysLog(`${colors.bold}${colors.cyan}\\----------------------------------------${colors.reset}`);
     } else if (base === '/instructions') { sysLog(`${colors.bold}${colors.cyan}--- Base Instructions ---${colors.reset}\n${SYSTEM_PROMPT}`);
     } else if (base === '/skills') {
-        sysLog(`${colors.bold}${colors.cyan}╭─ Installed Skills ─────────────────────${colors.reset}`);
+        sysLog(`${colors.bold}${colors.cyan}+-- Installed Skills --------------------${colors.reset}`);
         if (!fs.existsSync('./skills')) fs.mkdirSync('./skills');
         const files = fs.readdirSync('./skills').filter(f => f.endsWith('.md'));
-        if (files.length === 0) sysLog(`${colors.cyan}│${colors.reset} ${colors.dim}No skills found.${colors.reset}`);
-        else files.forEach(f => sysLog(`${colors.cyan}│${colors.reset} ${colors.green}• ${f}${colors.reset}`));
-        sysLog(`${colors.bold}${colors.cyan}╰────────────────────────────────────────${colors.reset}`);
+        if (files.length === 0) sysLog(`${colors.cyan}|${colors.reset} ${colors.dim}No skills found.${colors.reset}`);
+        else files.forEach(f => sysLog(`${colors.cyan}|${colors.reset} ${colors.green}• ${f}${colors.reset}`));
+        sysLog(`${colors.bold}${colors.cyan}\\----------------------------------------${colors.reset}`);
     } else if (base === '/clear') { chatHistory = []; sysLog(`${colors.green}✔ Context memory wiped.${colors.reset}`);
     } else { sysLog(`${colors.red}✖ Unknown command.${colors.reset}`); }
     sysLog();
@@ -268,7 +268,7 @@ async function handleSlashCommand(cmd) {
 async function loadConfig() {
     console.clear();
     console.log(`${colors.bold}${colors.magenta}┌──────────────────────────────────────────┐${colors.reset}`);
-    console.log(`${colors.bold}${colors.magenta}│       AUTONOMOUS AGENT STUDIO v10.6      │${colors.reset}`);
+    console.log(`${colors.bold}${colors.magenta}│       AUTONOMOUS AGENT STUDIO v10.7      │${colors.reset}`);
     console.log(`${colors.bold}${colors.magenta}└──────────────────────────────────────────┘${colors.reset}\n`);
     try { availableModels = _originalParse(fs.readFileSync('models.json', 'utf8')); } catch(e) {
         console.log(`${colors.yellow}⚠️ models.json not found. Run 'node add_model.js' first.${colors.reset}`);
@@ -337,64 +337,63 @@ async function processNextInQueue() {
 
             const thinkMatch = rawResponse.match(/<think>([\s\S]*?)<\/think>/i);
             if (thinkMatch && thinkMatch[1]) {
-                sysLog(`\n${colors.dim}╭─ 🧠 Reasoning ─────────────────────────`);
-                sysLog(thinkMatch[1].trim().split('\n').map(l => `│  ${l}`).join('\n'));
-                sysLog(`╰────────────────────────────────────────${colors.reset}`);
+                sysLog(`\n${colors.dim}+-- 🧠 Reasoning ------------------------`);
+                sysLog(thinkMatch[1].trim().split('\n').map(l => `|  ${l}`).join('\n'));
+                sysLog(`\\----------------------------------------${colors.reset}`);
             }
             
             const parsed = safeJsonParse(rawResponse);
             if (!parsed) {
                 let fallbackText = rawResponse.replace(/<think>[\s\S]*?<\/think>/gi, '').replace(/```json/gi, '').replace(/```/g, '').trim();
-                sysLog(`\n${colors.bold}${colors.green}╭─ ◆ AI (Raw Output) ────────────────────${colors.reset}`);
-                await sysLogAnimated(fallbackText, `${colors.green}│${colors.reset} `);
-                sysLog(`${colors.bold}${colors.green}╰────────────────────────────────────────${colors.reset}`);
+                sysLog(`\n${colors.bold}${colors.green}+-- ◆ AI (Raw Output) ───────────────────${colors.reset}`);
+                await sysLogAnimated(fallbackText, `${colors.green}|${colors.reset} `);
+                sysLog(`${colors.bold}${colors.green}\\----------------------------------------${colors.reset}`);
                 chatHistory.push({ role: "ai", content: rawResponse });
                 break;
             }
 
             if (parsed.task_manager) {
-                sysLog(`\n${colors.bold}${colors.blue}╭─ 📝 Task Board: ${colors.reset}${colors.dim}${parsed.task_manager.current_goal}${colors.reset}`);
-                if (parsed.task_manager.completed_tasks) parsed.task_manager.completed_tasks.forEach(t => sysLog(`${colors.blue}│${colors.reset}  ${colors.green}✔ ${t}${colors.reset}`));
-                if (parsed.task_manager.pending_tasks) parsed.task_manager.pending_tasks.forEach(t => sysLog(`${colors.blue}│${colors.reset}  ${colors.dim}□ ${t}${colors.reset}`));
-                sysLog(`${colors.bold}${colors.blue}╰────────────────────────────────────────${colors.reset}`);
+                sysLog(`\n${colors.bold}${colors.blue}+-- 📝 Task Board: ${colors.reset}${colors.dim}${parsed.task_manager.current_goal}${colors.reset}`);
+                if (parsed.task_manager.completed_tasks) parsed.task_manager.completed_tasks.forEach(t => sysLog(`${colors.blue}|${colors.reset}  ${colors.green}✔ ${t}${colors.reset}`));
+                if (parsed.task_manager.pending_tasks) parsed.task_manager.pending_tasks.forEach(t => sysLog(`${colors.blue}|${colors.reset}  ${colors.dim}□ ${t}${colors.reset}`));
+                sysLog(`${colors.bold}${colors.blue}\\----------------------------------------${colors.reset}`);
             }
 
             if (parsed.action === "tool_call" && Array.isArray(parsed.calls)) {
                 let combinedResults = "";
                 for (const call of parsed.calls) {
                     if (cancelWork) break;
-                    sysLog(`\n${colors.yellow}╭─ ⚙️  Invoking Tool: ${colors.bold}${call.tool}${colors.reset}`);
+                    sysLog(`\n${colors.yellow}+-- ⚙️  Invoking Tool: ${colors.bold}${call.tool}${colors.reset}`);
                     let toolResult = "";
                     
                     if (call.tool === 'execute_command') {
-                        sysLog(`${colors.yellow}│${colors.reset}  ${colors.bgRed}${colors.bold} COMMAND WARNING ${colors.reset}`);
+                        sysLog(`${colors.yellow}|${colors.reset}  ${colors.bgRed}${colors.bold} COMMAND WARNING ${colors.reset}`);
                         const cmdLines = (call.args.command || "").replace(/\r/g, '').split('\n');
-                        cmdLines.forEach(l => sysLog(`${colors.yellow}│${colors.reset}  ${colors.dim}${l}${colors.reset}`));
-                        sysLog(`${colors.yellow}│${colors.reset}`);
+                        cmdLines.forEach(l => sysLog(`${colors.yellow}|${colors.reset}  ${colors.dim}${l}${colors.reset}`));
+                        sysLog(`${colors.yellow}|${colors.reset}`);
                         
-                        const confirm = await askToolConfirm(`${colors.yellow}│${colors.reset}  Approve execution? ${colors.green}[y/N] or type feedback${colors.reset}: `);
+                        const confirm = await askToolConfirm(`${colors.yellow}|${colors.reset}  Approve execution? ${colors.green}[y/N] or type feedback${colors.reset}: `);
                         const ans = confirm.trim();
                         
                         if (ans.toLowerCase() === 'y' || ans.toLowerCase() === 'yes') {
                             try { 
-                                sysLog(`${colors.yellow}│${colors.reset}  ${colors.dim}Executing...${colors.reset}`);
-                                // STRICT PIPE INTERCEPTION: Stops errors from bypassing Node and ruining the terminal UI
+                                sysLog(`${colors.yellow}|${colors.reset}  ${colors.dim}Executing...${colors.reset}`);
                                 toolResult = execSync(call.args.command, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }); 
-                                sysLog(`${colors.yellow}├─ ${colors.green}✔ Command Complete${colors.reset}`);
+                                sysLog(`${colors.yellow}+-- ${colors.green}✔ Command Complete${colors.reset}`);
                             } catch(e) { 
                                 toolResult = `Error Status ${e.status}:\n${e.stderr ? e.stderr.toString().trim() : e.message}`; 
-                                sysLog(`${colors.yellow}├─ ${colors.red}✖ Command Failed${colors.reset}`);
+                                sysLog(`${colors.yellow}+-- ${colors.red}✖ Command Failed${colors.reset}`);
                             }
                         } else if (ans.toLowerCase() === 'n' || ans.toLowerCase() === 'no' || ans === '') {
                             toolResult = "User denied command execution.";
-                            sysLog(`${colors.yellow}├─ ${colors.red}✖ Execution Aborted${colors.reset}`);
+                            sysLog(`${colors.yellow}+-- ${colors.red}✖ Execution Aborted${colors.reset}`);
                         } else {
                             toolResult = `User denied command execution and provided this feedback/instruction: "${ans}"`;
-                            sysLog(`${colors.yellow}├─ ${colors.yellow}⚠ Aborted. Feedback routed to AI.${colors.reset}`);
+                            sysLog(`${colors.yellow}+-- ${colors.yellow}⚠ Aborted. Feedback routed to AI.${colors.reset}`);
                         }
                     
                     } else if (call.tool === 'spawn_sub_agent') {
-                        sysLog(`${colors.yellow}│${colors.reset}  ${colors.magenta}Spawning Worker Node: ${colors.bold}${call.args.role}${colors.reset}`);
+                        sysLog(`${colors.yellow}|${colors.reset}  ${colors.magenta}Spawning Worker Node: ${colors.bold}${call.args.role}${colors.reset}`);
                         spinner.start();
                         spinner.update(`Worker [${call.args.role}] is active`);
                         
@@ -406,46 +405,46 @@ async function processNextInQueue() {
                             let cleanReport = subAgentResponse.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
                             toolResult = `[SWARM NODE REPORT: ${call.args.role}]\n${cleanReport}`;
                             spinner.stop(true);
-                            sysLog(`${colors.yellow}├─ ${colors.green}✔ Worker Node Terminated (Data Received)${colors.reset}`);
+                            sysLog(`${colors.yellow}+-- ${colors.green}✔ Worker Node Terminated (Data Received)${colors.reset}`);
                         } catch(e) {
                             spinner.stop(true);
                             toolResult = `[SWARM FATAL ERROR]: Worker node ${call.args.role} failed: ${e.message}`;
-                            sysLog(`${colors.yellow}├─ ${colors.red}✖ Worker Node Failed${colors.reset}`);
+                            sysLog(`${colors.yellow}+-- ${colors.red}✖ Worker Node Failed${colors.reset}`);
                         }
                     } else {
-                        sysLog(`${colors.yellow}│${colors.reset}  ${colors.dim}Executing API Tool...${colors.reset}`);
+                        sysLog(`${colors.yellow}|${colors.reset}  ${colors.dim}Executing API Tool...${colors.reset}`);
                         spinner.start();
                         spinner.update(`Running ${call.tool}`);
                         toolResult = await tools.execute(call.tool, call.args);
                         spinner.stop(true);
-                        sysLog(`${colors.yellow}├─ ${colors.green}✔ Done${colors.reset}`);
+                        sysLog(`${colors.yellow}+-- ${colors.green}✔ Done${colors.reset}`);
                     }
                     
                     if (toolResult && toolResult.trim().length > 0) {
-                        sysLog(`${colors.yellow}├─ 📄 Tool Output:${colors.reset}`);
+                        sysLog(`${colors.yellow}+-- 📄 Tool Output:${colors.reset}`);
                         const outLines = toolResult.trim().replace(/\r/g, '').split('\n');
                         const displayLines = outLines.slice(0, 25);
-                        displayLines.forEach(l => sysLog(`${colors.yellow}│${colors.reset}  ${colors.dim}${l}${colors.reset}`));
+                        displayLines.forEach(l => sysLog(`${colors.yellow}|${colors.reset}  ${colors.dim}${l}${colors.reset}`));
                         if (outLines.length > 25) {
-                            sysLog(`${colors.yellow}│${colors.reset}  ${colors.dim}... (${outLines.length - 25} more lines hidden from UI to save screen space)${colors.reset}`);
+                            sysLog(`${colors.yellow}|${colors.reset}  ${colors.dim}... (${outLines.length - 25} more lines hidden from UI to save screen space)${colors.reset}`);
                         }
                     }
-                    sysLog(`${colors.yellow}╰────────────────────────────────────────${colors.reset}`);
+                    sysLog(`${colors.yellow}\\----------------------------------------${colors.reset}`);
                     combinedResults += `\n--- Result for ${call.tool} ---\n${toolResult}\n`;
                 }
                 aiPrompt = `Batched tools executed. Results:\n${combinedResults}\nUpdate your task manager and continue.`;
                 chatHistory.push({ role: "system", content: aiPrompt });
                 
             } else if (parsed.action === "complete") {
-                sysLog(`\n${colors.bold}${colors.green}╭─ ◆ AI ─────────────────────────────────${colors.reset}`);
-                await sysLogAnimated(parsed.result, `${colors.green}│${colors.reset}  `);
-                sysLog(`${colors.bold}${colors.green}╰────────────────────────────────────────${colors.reset}`);
+                sysLog(`\n${colors.bold}${colors.green}+-- ◆ AI --------------------------------${colors.reset}`);
+                await sysLogAnimated(parsed.result, `${colors.green}|${colors.reset}  `);
+                sysLog(`${colors.bold}${colors.green}\\----------------------------------------${colors.reset}`);
                 chatHistory.push({ role: "ai", content: parsed.result });
                 isComplete = true;
             } else {
-                sysLog(`\n${colors.bold}${colors.green}╭─ ◆ AI (JSON Output) ───────────────────${colors.reset}`);
-                await sysLogAnimated(JSON.stringify(parsed, null, 2), `${colors.green}│${colors.reset}  `);
-                sysLog(`${colors.bold}${colors.green}╰────────────────────────────────────────${colors.reset}`);
+                sysLog(`\n${colors.bold}${colors.green}+-- ◆ AI (JSON Output) ------------------${colors.reset}`);
+                await sysLogAnimated(JSON.stringify(parsed, null, 2), `${colors.green}|${colors.reset}  `);
+                sysLog(`${colors.bold}${colors.green}\\----------------------------------------${colors.reset}`);
                 chatHistory.push({ role: "ai", content: JSON.stringify(parsed) });
                 isComplete = true;
             }
@@ -457,11 +456,11 @@ async function processNextInQueue() {
                 break;
             }
             sysLog(`\n${colors.red}${colors.bold}✖ API Error Intercepted:${colors.reset} ${err.message}\n`);
-            sysLog(`${colors.bold}${colors.cyan}╭─ Auto-Model Rescue ────────────────────${colors.reset}`);
-            sysLog(`${colors.cyan}│${colors.reset} ${colors.dim}The current model (${activeModel.name}) rejected the request.${colors.reset}`);
-            sysLog(`${colors.cyan}│${colors.reset} ${colors.green}[M]${colors.reset} Switch to a different model and auto-resume task`);
-            sysLog(`${colors.cyan}│${colors.reset} ${colors.green}[A]${colors.reset} Abort and return to prompt`);
-            sysLog(`${colors.bold}${colors.cyan}╰────────────────────────────────────────${colors.reset}`);
+            sysLog(`${colors.bold}${colors.cyan}+-- Auto-Model Rescue -------------------${colors.reset}`);
+            sysLog(`${colors.cyan}|${colors.reset} ${colors.dim}The current model (${activeModel.name}) rejected the request.${colors.reset}`);
+            sysLog(`${colors.cyan}|${colors.reset} ${colors.green}[M]${colors.reset} Switch to a different model and auto-resume task`);
+            sysLog(`${colors.cyan}|${colors.reset} ${colors.green}[A]${colors.reset} Abort and return to prompt`);
+            sysLog(`${colors.bold}${colors.cyan}\\----------------------------------------${colors.reset}`);
             
             rl.removeListener('line', lineHandler);
             const fallbackChoice = await askSync(`\nSelect action [M/A]: `);
@@ -484,7 +483,6 @@ async function processNextInQueue() {
         }
     }
     
-    // Explicitly re-enable prompt only after ALL loops are finished
     isProcessing = false;
     rl.prompt(true);
 }
