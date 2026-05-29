@@ -3,10 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AxilO - Autonomous AI Swarm Orchestrator</title>
-    <meta name="description" content="AxilO is an elite, autonomous AI swarm orchestrator built for Termux and Android. Featuring sub-agent delegation, token conservation, and a strict ASCII CLI interface.">
-    <meta name="keywords" content="AxilO, AI Agent, Termux AI, Swarm Orchestrator, CLI AI, Node.js AI, Android AI framework">
+    
+    <title>AxilO-AGENT: Autonomous AI Multi-Agent Swarm Orchestrator for Termux</title>
+    <meta name="description" content="Official home of AxilO-AGENT, an advanced autonomous AI multi-agent swarm orchestrator running natively on Termux and Android. Optimize context windows with token conservation and sub-agent delegation.">
+    <meta name="keywords" content="AxilO-AGENT, AxilO, AI Agent, Swarm Orchestrator, Termux AI, Android AI Framework, CLI AI, Multi-Agent Swarm, Node.js AI Engine">
     <meta name="author" content="Satyabrata Dey">
+    <link rel="canonical" href="https://satyabratadey10-a11y.github.io/AxilO-AGENT/" />
     
     <meta name="google-site-verification" content="ntqhY23nbjfAAtehPFKMgi87mzGw6ornPpOqw5Z7Sp4" />
 
@@ -36,9 +38,16 @@
         }
         h1 {
             color: #58a6ff;
-            font-size: 2em;
+            font-size: 2.2em;
             margin-bottom: 10px;
             text-align: center;
+        }
+        h2 {
+            color: #58a6ff;
+            font-size: 1.5em;
+            border-bottom: 1px solid #30363d;
+            padding-bottom: 5px;
+            margin-top: 25px;
         }
         .ascii-art {
             color: #3fb950;
@@ -50,7 +59,7 @@
             overflow-x: auto;
         }
         p {
-            font-size: 1em;
+            font-size: 1.05em;
             line-height: 1.6;
         }
         .feature-list {
@@ -59,7 +68,8 @@
             padding-left: 20px;
         }
         .feature-list li {
-            margin-bottom: 10px;
+            margin-bottom: 12px;
+            line-height: 1.5;
         }
         .terminal-box {
             background-color: #010409;
@@ -87,17 +97,24 @@
             background-color: #2ea043;
         }
         
+        /* Mobile Layout Guard (Core Web Vitals Optimization) */
         @media (max-width: 600px) {
-            .ascii-art { font-size: 8px; }
-            .container { padding: 15px; }
-            h1 { font-size: 1.5em; }
+            .ascii-art {
+                font-size: 8px;
+            }
+            .container {
+                padding: 15px;
+            }
+            h1 {
+                font-size: 1.6em;
+            }
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <div class="ascii-art">
+    <main class="container">
+        <header class="ascii-art">
 ┌──────────────────────────────────────────────────────────────┐
 │                                                              │
 │          ┌─┐        _  │    ╭───╮                            │
@@ -106,28 +123,30 @@
 │          │ │  ╱  ╲  │  └─── ╰───╯  v1.0                      │
 │                                                              │
 └──────────────────────────────────────────────────────────────┘
-        </div>
-        <h1>AxilO Swarm Framework</h1>
-        <p>The ultimate autonomous AI Orchestrator running natively on Termux. AxilO utilizes a specialized Swarm Protocol to spawn worker drones, manage complex local systems, and execute bash commands through a beautifully crafted universal ASCII UI.</p>
+        </header>
         
-        <h2>Core Capabilities:</h2>
+        <h1>AxilO-AGENT Swarm Framework</h1>
+        <p>Welcome to the official deployment hub for <strong>AxilO-AGENT</strong>, the premier autonomous AI multi-agent orchestration framework built to execute natively inside terminal environments on mobile system endpoints (Termux / Android / aarch64).</p>
+        
+        <h2>Advanced Multi-Agent Capabilities</h2>
         <ul class="feature-list">
-            <li><strong>Worker Drones:</strong> Spawns specialized sub-agents to preserve main context tokens.</li>
-            <li><strong>Token Conservation:</strong> Dynamically bypasses reasoning loops for trivial tasks.</li>
-            <li><strong>Strict Execution Pipes:</strong> Sandboxes standard errors to prevent terminal UI bleed.</li>
-            <li><strong>Universal Interface:</strong> Rock-solid ASCII geometry guaranteed to render on all Android mobile fonts.</li>
+            <li><strong>Autonomous Sub-Agent Delegation:</strong> Uses a rigorous Swarm Protocol to spawn specialized, isolated background worker nodes for complex reasoning tasks, successfully maintaining a clean parent context window.</li>
+            <li><strong>Token Conservation Architecture:</strong> Implements conditional context boundaries, dynamically cutting reasoning loops for obvious or repetitive shell tasks to minimize API resource drain.</li>
+            <li><strong>Isolated Sub-Process Error Piping:</strong> Intercepts standard error streams cleanly within Node.js, ensuring native runtime panics never bleed out to break the terminal user interface topology.</li>
+            <li><strong>Universal ASCII Layout:</strong> Built completely with resilient base character geometry to guarantee pixel-perfect presentation formatting across any native mobile system typography.</li>
         </ul>
 
+        <h2>Installation and Quickstart</h2>
         <div class="terminal-box">
 $ git clone https://github.com/satyabratadey10-a11y/AxilO-AGENT.git<br>
 $ cd AxilO-AGENT<br>
 $ node agent.js
         </div>
 
-        <div style="text-align: center;">
+        <footer style="text-align: center;">
             <a href="https://github.com/satyabratadey10-a11y/AxilO-AGENT" class="btn">View Source on GitHub</a>
-        </div>
-    </div>
+        </footer>
+    </main>
 
 </body>
 </html>
