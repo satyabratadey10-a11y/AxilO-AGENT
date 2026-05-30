@@ -1,1 +1,99 @@
-<!DOCTYPE html><html><head><title>System Test</title><style>body { background-color: #282c34; color: #61dafb; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; } .card { background: #20232a; padding: 2rem; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); text-align: center; border: 1px solid #61dafb; }</style></head><body><div class="card"><h1>Hello from Termux</h1><p>The local server is running successfully!</p><div style="color: #e06c75;">Status: Online</div></div></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minimal Chat UI</title>
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --sidebar-bg: #f9f9f9;
+            --text-main: #1a1a1a;
+            --border-color: #e5e7eb;
+            --accent-color: #7c3aed;
+            --bubble-user: #f3f4f6;
+            --bubble-ai: #ffffff;
+        }
+        body, html {
+            margin: 0; padding: 0; height: 100%;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-color); color: var(--text-main);
+        }
+        .container {
+            display: flex; height: 100vh; max-width: 1000px; margin: 0 auto;
+            flex-direction: column;
+        }
+        header {
+            padding: 1.5rem; border-bottom: 1px solid var(--border-color);
+            text-align: center; font-weight: 600; font-size: 1.1rem;
+        }
+        #chat-window {
+            flex: 1; overflow-y: auto; padding: 2rem 1rem;
+            display: flex; flex-direction: column; gap: 1.5rem;
+        }
+        .message {
+            max-width: 80%; padding: 1rem 1.25rem; border-radius: 1.5rem;
+            line-height: 1.5; font-size: 0.95rem; animation: fadeIn 0.3s ease;
+        }
+        .user { align-self: flex-end; background: var(--bubble-user); }
+        .ai { align-self: flex-start; background: var(--bubble-ai); border: 1px solid var(--border-color); }
+        .input-area {
+            padding: 2rem; background: var(--bg-color);
+        }
+        .input-container {
+            position: relative; max-width: 800px; margin: 0 auto;
+            border: 1px solid var(--border-color); border-radius: 1rem;
+            padding: 0.75rem 1rem; display: flex; align-items: center;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        }
+        input {
+            flex: 1; border: none; outline: none; font-size: 1rem; padding: 0.5rem;
+        }
+        button {
+            background: var(--accent-color); color: white; border: none;
+            padding: 0.5rem 1rem; border-radius: 0.5rem; cursor: pointer;
+            font-weight: 500; transition: opacity 0.2s;
+        }
+        button:hover { opacity: 0.9; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>Chat Interface</header>
+        <div id="chat-window">
+            <div class="message ai">Hello! How can I help you today?</div>
+        </div>
+        <div class="input-area">
+            <div class="input-container">
+                <input type="text" id="user-input" placeholder="Send a message..." onkeypress="if(event.key==='Enter') sendMessage()">
+                <button onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        function sendMessage() {
+            const input = document.getElementById('user-input');
+            const chat = document.getElementById('chat-window');
+            if(!input.value.trim()) return;
+            
+            const userMsg = document.createElement('div');
+            userMsg.className = 'message user';
+            userMsg.textContent = input.value;
+            chat.appendChild(userMsg);
+            
+            const val = input.value;
+            input.value = '';
+            chat.scrollTop = chat.scrollHeight;
+
+            setTimeout(() => {
+                const aiMsg = document.createElement('div');
+                aiMsg.className = 'message ai';
+                aiMsg.textContent = 'I am a minimal UI demo inspired by your design principles.';
+                chat.appendChild(aiMsg);
+                chat.scrollTop = chat.scrollHeight;
+            }, 600);
+        }
+    </script>
+</body>
+</html>

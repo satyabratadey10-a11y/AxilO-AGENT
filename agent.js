@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const readline = require('readline');
-const { execSync } = require('child_process');
+const { exec } = require('child_process');
 const tools = require('./tools.js');
 const api = require('./connection.js');
 
@@ -77,6 +77,54 @@ let abortController = new AbortController();
 let pasteBuffer = [];
 let pasteTimer = null;
 
+// --- SESSION MANAGEMENT ---
+const SESSIONS_DIR = './sessions';
+let currentSessionFile = null;
+let currentSessionTitle = "Untitled Chat";
+
+if (!fs.existsSync(SESSIONS_DIR)) {
+    fs.mkdirSync(SESSIONS_DIR);
+}
+
+function getAvailableSessions() {
+    const files = fs.readdirSync(SESSIONS_DIR).filter(f => f.endsWith('.json'));
+    const sessions = [];
+    for (const file of files) {
+        try {
+            const data = JSON.parse(fs.readFileSync(path.join(SESSIONS_DIR, file), 'utf8'));
+            sessions.push({
+                filename: file,
+                title: data.title || file,
+                timestamp: fs.statSync(path.join(SESSIONS_DIR, file)).mtimeMs
+            });
+        } catch(e) {}
+    }
+    return sessions.sort((a, b) => b.timestamp - a.timestamp); 
+}
+
+async function generateChatTitle(firstPrompt) {
+    if (!activeModel) return "New Conversation";
+    try {
+        const titlePrompt = `Summarize this user prompt into a short, catchy title (3 to 6 words maximum). Return ONLY the raw text of the title, with absolutely no quotes, no markdown, and no reasoning blocks. Prompt: "${firstPrompt}"`;
+        const rawResponse = await api.callAI({
+            activeModel, 
+            chatHistory: [{ role: "user", content: titlePrompt }], 
+            promptText: titlePrompt, 
+            abortController: new AbortController(), 
+            spinner: { start: () => {}, stop: () => {}, update: () => {} }, 
+            sysLog: () => {}, 
+            colors, 
+            SYSTEM_PROMPT: "You are a concise title generator. Provide ONLY the title string."
+        });
+        
+        let cleanTitle = rawResponse.replace(/<think>[\s\S]*?<\/think>/gi, '').replace(/["']/g, '').trim();
+        if (cleanTitle.length > 50) cleanTitle = cleanTitle.substring(0, 47) + "...";
+        return cleanTitle || "New Conversation";
+    } catch(err) {
+        return "New Conversation";
+    }
+}
+
 // --- DECOUPLED SAFE PARSING ENGINE ---
 const _originalParse = JSON.parse;
 function safeJsonParse(text) {
@@ -84,7 +132,8 @@ function safeJsonParse(text) {
     try { return _originalParse(text); } catch (e) {
         try {
             let cleaned = text.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
-            cleaned = cleaned.replace(/```json/gi, '').replace(/```/g, '').trim();
+            cleaned = cleaned.replace(/```json/gi, '').replace(/
+```/g, '').trim();
             const start = cleaned.indexOf('{');
             const end = cleaned.lastIndexOf('}');
             if (start !== -1 && end !== -1 && start < end) {
@@ -154,7 +203,7 @@ CORE OPERATING PROCEDURES:
 1. PLAN: Break the user's request into logical, discrete steps using the "task_manager". 
 2. DELEGATE (Swarm Protocol): If a task requires deep code analysis, independent research, or complex logic that would bloat your context window, use 'spawn_sub_agent' to hand it to a specialized worker.
 3. EXECUTE (Batching): Group multiple independent tool calls into a single response to save time and API requests.
-4. VERIFY: Do not blindly assume a command worked. Check the output before proceeding.
+4. VERIFY: Do not blindly assume a command worked. Check the output before proceeding. If you write a file, you MUST verify it exists using 'ls' or 'cat' in your next step.
 5. TERMINATE (CRITICAL): Once the ultimate goal is achieved, you MUST immediately set "action" to "complete" and provide a final summary. DO NOT loop endlessly.
 6. FAIL-SAFE: If a tool fails 3 times in a row, set "action" to "complete" and explicitly ask the user for assistance.
 7. TOKEN CONSERVATION (CONDITIONAL REASONING): Do NOT generate <think> reasoning blocks for simple, repetitive, or obvious tasks (like creating basic files, routing commands, or simple conversational replies). ONLY use reasoning blocks for highly complex architectural planning or critical debugging. Skip the thought process whenever possible to save tokens.
@@ -176,9 +225,16 @@ You must strictly format your ENTIRE response as a valid JSON object. No raw mar
 function saveAndExit() {
     spinner.start();
     spinner.update("Saving context");
-    fs.writeFileSync('history.json', JSON.stringify(chatHistory, null, 2));
+    if (!currentSessionFile) {
+        currentSessionFile = `session_${Date.now()}.json`;
+    }
+    const sessionData = {
+        title: currentSessionTitle,
+        history: chatHistory
+    };
+    fs.writeFileSync(path.join(SESSIONS_DIR, currentSessionFile), JSON.stringify(sessionData, null, 2));
     spinner.stop();
-    sysLog(`${colors.green}✔ Context saved. Terminating.${colors.reset}`);
+    sysLog(`${colors.green}✔ Context saved to ${currentSessionFile}. Terminating.${colors.reset}`);
     process.exit(0);
 }
 
@@ -286,10 +342,35 @@ async function loadConfig() {
     const choice = await askSync(`\nSelect a core [1-${availableModels.length}]: `);
     activeModel = availableModels[parseInt(choice)-1] || availableModels[0];
 
+    if (fs.existsSync('history.json')) {
+        const legacyData = _originalParse(fs.readFileSync('history.json', 'utf8'));
+        const migratedFile = `session_${Date.now()}.json`;
+        fs.writeFileSync(path.join(SESSIONS_DIR, migratedFile), JSON.stringify({ title: "Migrated Session", history: legacyData }, null, 2));
+        fs.renameSync('history.json', 'history_backup.json');
+    }
+
     console.log(`\n${colors.bold}Session State:${colors.reset}`);
-    console.log(`  ${colors.cyan}[1]${colors.reset} New Environment\n  ${colors.cyan}[2]${colors.reset} Resume Context`);
-    const sessionChoice = await askSync("\nSelect option: ");
-    if (sessionChoice === '2' && fs.existsSync('history.json')) chatHistory = _originalParse(fs.readFileSync('history.json', 'utf8'));
+    const sessions = getAvailableSessions();
+    console.log(`  ${colors.cyan}[1]${colors.reset} New Chat`);
+    sessions.forEach((s, idx) => {
+        console.log(`  ${colors.cyan}[${idx + 2}]${colors.reset} ${s.title} ${colors.dim}(${new Date(s.timestamp).toLocaleDateString()})${colors.reset}`);
+    });
+    
+    const sessionChoice = await askSync(`\nSelect option [1-${sessions.length + 1}]: `);
+    const selectionIndex = parseInt(sessionChoice) - 2;
+
+    if (selectionIndex >= 0 && selectionIndex < sessions.length) {
+        currentSessionFile = sessions[selectionIndex].filename;
+        const loadData = _originalParse(fs.readFileSync(path.join(SESSIONS_DIR, currentSessionFile), 'utf8'));
+        chatHistory = loadData.history || [];
+        currentSessionTitle = loadData.title || "Untitled Chat";
+        console.log(`${colors.green}✔ Resumed: ${currentSessionTitle}${colors.reset}`);
+    } else {
+        currentSessionFile = `session_${Date.now()}.json`;
+        chatHistory = [];
+        currentSessionTitle = "Untitled Chat";
+    }
+
     if (!fs.existsSync('./skills')) fs.mkdirSync('./skills');
     console.clear();
     console.log(`${colors.dim}Session active. Model: ${activeModel.name}. Type '/' for menu.${colors.reset}\n`);
@@ -327,6 +408,15 @@ async function processNextInQueue() {
     isProcessing = true;
     cancelWork = false;
     const currentPrompt = promptQueue.shift();
+    
+    if (chatHistory.length === 0) {
+        spinner.start();
+        spinner.update("Generating session title");
+        currentSessionTitle = await generateChatTitle(currentPrompt);
+        spinner.stop(true);
+        sysLog(`${colors.dim}Session named: ${currentSessionTitle}${colors.reset}`);
+    }
+
     chatHistory.push({ role: "user", content: currentPrompt });
     let isComplete = false;
     let aiPrompt = currentPrompt;
@@ -383,12 +473,44 @@ async function processNextInQueue() {
                         const ans = confirm.trim();
                         
                         if (ans.toLowerCase() === 'y' || ans.toLowerCase() === 'yes') {
+                            sysLog(`${colors.yellow}|${colors.reset}  ${colors.dim}Executing (Async Background Support)...${colors.reset}`);
                             try { 
-                                sysLog(`${colors.yellow}|${colors.reset}  ${colors.dim}Executing...${colors.reset}`);
-                                toolResult = execSync(call.args.command, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }); 
-                                sysLog(`${colors.yellow}+-- ${colors.green}✔ Command Complete${colors.reset}`);
+                                toolResult = await new Promise((resolve, reject) => {
+                                    const childProcess = exec(call.args.command, { encoding: 'utf8', maxBuffer: 1024 * 1024 * 5 });
+                                    let outputBuffer = "";
+                                    let isDone = false;
+                                    
+                                    const autoDetachTimer = setTimeout(() => {
+                                        if (!isDone) {
+                                            isDone = true;
+                                            childProcess.unref(); 
+                                            resolve(outputBuffer + "\n[Process taking longer than 8 seconds. Detached and continuing safely in the background.]");
+                                        }
+                                    }, 8000); 
+
+                                    childProcess.stdout?.on('data', data => { outputBuffer += data; });
+                                    childProcess.stderr?.on('data', data => { outputBuffer += data; });
+                                    
+                                    childProcess.on('close', code => {
+                                        if (!isDone) {
+                                            isDone = true;
+                                            clearTimeout(autoDetachTimer);
+                                            if (code === 0) resolve(outputBuffer);
+                                            else reject(new Error(`Exit status ${code}:\n${outputBuffer}`));
+                                        }
+                                    });
+                                    
+                                    childProcess.on('error', err => {
+                                        if (!isDone) {
+                                            isDone = true;
+                                            clearTimeout(autoDetachTimer);
+                                            reject(err);
+                                        }
+                                    });
+                                });
+                                sysLog(`${colors.yellow}+-- ${colors.green}✔ Command Dispatched${colors.reset}`);
                             } catch(e) { 
-                                toolResult = `Error Status ${e.status}:\n${e.stderr ? e.stderr.toString().trim() : e.message}`; 
+                                toolResult = e.message; 
                                 sysLog(`${colors.yellow}+-- ${colors.red}✖ Command Failed${colors.reset}`);
                             }
                         } else if (ans.toLowerCase() === 'n' || ans.toLowerCase() === 'no' || ans === '') {
