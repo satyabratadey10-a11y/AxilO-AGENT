@@ -165,31 +165,31 @@ function buildSystemPrompt() {
 
     let skillInjection = '';
     if (activeSkillContext) {
-        skillInjection = `\n\n=== ACTIVE DOMAIN GUIDELINES (${activeSkillContext.name}) ===\n${activeSkillContext.content}\n=== END DOMAIN GUIDELINES ===\nIMPORTANT: The above domain guidelines offer technical domain methodology. You are NEVER restricted to MCP-only tools. You ALWAYS have unrestricted shell access via 'execute_command' and native tools ('inspect_apk', 'open_binary', 'search_android_classes', 'analyze_function', 'read_file', 'write_file', 'patch_file'). If a specialized MCP tool mentioned in the guideline is not present as a native tool, execute the inspection directly using Linux CLI tools (unzip, strings, grep, aapt2, dexdump) through 'execute_command' or 'open_binary'.\n`;
+        skillInjection = `\n\n=== ACTIVE DOMAIN GUIDELINES (${activeSkillContext.name}) ===\n${activeSkillContext.content}\n=== END DOMAIN GUIDELINES ===\nIMPORTANT: The above domain guidelines offer technical domain methodology. You ALWAYS have unrestricted shell access via 'execute_command' and native tools ('inspect_apk', 'open_binary', 'search_android_classes', 'analyze_function', 'read_file', 'write_file', 'patch_file'). If a specialized MCP tool mentioned in the guideline is not present as a native tool, execute the inspection directly using Linux CLI tools (unzip, strings, grep, aapt2, dexdump) through 'execute_command' or 'open_binary'.\n`;
     }
 
     return `You are AxilO, a world-class autonomous software engineering and reverse engineering AI agent running natively in the user's terminal.
 Current working directory: ${process.cwd()}
 Host environment: Linux / Android Termux (aarch64)
 
-CONVERSATION MEMORY & RECALL:
-- You have continuous conversational memory across this session.
-- The full conversation history (all prior user inputs, tool outputs, and assistant replies) is contained in the message list above.
-- When the user asks what they said earlier, asks about previous messages, or follows up on earlier steps, review the conversation messages and answer accurately. NEVER say you have no memory or cannot recall earlier messages in this chat.
-
-CAPABILITIES & OPERATING PRINCIPLES:
-1. Native Tool Execution: You have full access to native tools:
-   - 'execute_command': Run bash shell commands directly in Linux/Android Termux. Supports synchronous commands and long-running background tasks ('is_background: true').
-   - 'manage_task': List, check status, inspect logs, or terminate background tasks.
+CRITICAL OPERATING RULES:
+1. AUTONOMOUS TOOL EXECUTION:
+   - YOU MUST EXECUTE TOOLS DIRECTLY. Do NOT write markdown bash commands (like \`\`\`bash ... \`\`\`) expecting the user to copy-paste or execute them for you.
+   - When asked to investigate, inspect, unpack, or decompile, invoke 'open_binary', 'inspect_apk', or 'execute_command' IMMEDIATELY.
+2. FULL CONVERSATION MEMORY:
+   - You have continuous conversational memory across this entire session. All previous user inputs and answers are in the message history above.
+   - When the user asks what they asked earlier, asks to recall previous steps, or tests your memory, check the conversation messages above and answer specifically.
+   - NEVER recite generic disclaimers claiming "I don't have memory", "each session starts fresh", or "I cannot recall earlier messages". You CAN see the full conversation.
+3. NATIVE TOOLS AVAILABLE:
+   - 'execute_command': Run bash shell commands directly in Linux/Android Termux.
    - 'open_binary': Inspect binary and Android APK packages (structure, DEX files, manifest, strings).
    - 'inspect_apk': Extract AndroidManifest.xml, list DEX files, or search strings.
    - 'search_android_classes': Search class names, activities, and dialog components in APKs.
    - 'analyze_function': Search and analyze class methods, functions, and symbols.
    - 'read_file', 'write_file', 'patch_file', 'list_directory': Inspect and surgically modify project files.
-   - 'web_search', 'fetch_web_content': Online research and documentation lookup.
-2. Direct Action: When asked to investigate, build, patch, analyze, or search, invoke tools immediately. Do not ask for unnecessary confirmations for read-only actions.
-3. APK Analysis: When investigating Android APKs, use 'open_binary' or 'inspect_apk' or execute shell commands ('unzip -l', 'strings', 'dexdump', 'aapt2', 'grep') to locate dialogs, update gates, and features.
-4. Response Style: Be concise, direct, and actionable. Keep internal reasoning focused and rapid.${memoryBlock}${skillsListing}${skillInjection}`;
+   - 'manage_task': List, check status, inspect logs, or terminate background tasks.
+4. APK ANALYSIS: When investigating Android APKs, use 'open_binary' or 'inspect_apk' or execute shell commands ('unzip -l', 'strings', 'dexdump', 'aapt2', 'grep') to locate dialogs, update gates, and features.
+5. RESPONSE STYLE: Be concise, direct, and actionable. Keep internal reasoning focused and rapid.${memoryBlock}${skillsListing}${skillInjection}`;
 }
 
 // Session & Shared Memory Architecture (Dedicated Directory per Session)
@@ -402,7 +402,8 @@ function loadSkill(skillName) {
 // Claude Code Header Banner
 function renderHeaderBanner() {
     const termWidth = process.stdout.columns || 80;
-    const divider = '─'.repeat(Math.min(termWidth - 2, 74));
+    const dividerLen = Math.max(20, Math.min(termWidth - 2, 68));
+    const divider = '─'.repeat(dividerLen);
     
     let endpointHost = '';
     try {
@@ -413,9 +414,8 @@ function renderHeaderBanner() {
     }
 
     console.log();
-    console.log(`           ${C.bold}AxilO Code v2.5.0${C.reset}`);
-    console.log(` ${C.coral}▐▛███▜▌${C.reset}   ${C.bold}${activeModel.id}${C.reset} ${C.gray}· ${endpointHost}${C.reset}`);
-    console.log(` ${C.coral}▝▜█████▛▘${C.reset}  ${C.gray}${process.cwd()}${C.reset}`);
+    console.log(` ${C.coral}▐▛███▜▌${C.reset}   ${C.bold}AxilO Code v2.5.0${C.reset} ${C.gray}· ${activeModel.id}${C.reset}`);
+    console.log(` ${C.coral}▝▜█████▛▘${C.reset}  ${C.gray}${endpointHost} · ${process.cwd()}${C.reset}`);
     console.log(` ${C.coral}  ▘▘ ▝▝${C.reset}    ${C.dim}Welcome to AxilO! · /help for commands · /model to switch${C.reset}`);
     console.log();
     console.log(`${C.darkGray}${divider}${C.reset}`);
@@ -423,7 +423,8 @@ function renderHeaderBanner() {
 
 function renderDivider() {
     const termWidth = process.stdout.columns || 80;
-    const divider = '─'.repeat(Math.min(termWidth - 2, 74));
+    const dividerLen = Math.max(20, Math.min(termWidth - 2, 68));
+    const divider = '─'.repeat(dividerLen);
     console.log(`${C.darkGray}${divider}${C.reset}`);
 }
 
@@ -524,6 +525,29 @@ function extractFallbackToolCalls(responseText) {
         }
     }
 
+    if (calls.length > 0) return calls;
+
+    // D. Fallback for models outputting markdown bash blocks instead of calling execute_command
+    const bashBlockRegex = /```(?:bash|sh|shell|zsh)\s*([\s\S]*?)\s*```/gi;
+    let bMatch;
+    const bashCmds = [];
+    while ((bMatch = bashBlockRegex.exec(cleaned)) !== null) {
+        const rawBlock = bMatch[1].trim();
+        const executableLines = rawBlock.split('\n')
+            .map(l => l.trim())
+            .filter(l => l && !l.startsWith('#'));
+        if (executableLines.length > 0) {
+            bashCmds.push(rawBlock);
+        }
+    }
+    if (bashCmds.length > 0) {
+        calls.push({
+            id: `call_bash_${Date.now()}`,
+            name: 'execute_command',
+            args: { command: bashCmds.join('\n') }
+        });
+    }
+
     return calls;
 }
 
@@ -549,11 +573,17 @@ async function runAgent(promptText) {
         spinner.start('Cogitating');
 
         try {
+            let systemPrompt = buildSystemPrompt();
+            const memoryCheckRegex = /(what\s+(did\s+)?i\s+(ask|say|tell)|do\s+you\s+(have\s+)?memory|recall|remember|previous\s+message)/i;
+            if (memoryCheckRegex.test(promptText)) {
+                systemPrompt += `\n\n=== DIRECT MEMORY RECALL INSTRUCTION ===\nThe user is asking what they asked or said earlier in this active session.\nReview the previous user messages in the chat history provided above and answer directly by stating their earlier prompts.\nNEVER recite a disclaimer claiming that you have no memory or that each session starts fresh.\n========================================\n`;
+            }
+
             const result = await api.callAI({
                 activeModel,
                 chatHistory,
                 promptText: null, // fullHistory is constructed from chatHistory
-                SYSTEM_PROMPT: buildSystemPrompt(),
+                SYSTEM_PROMPT: systemPrompt,
                 tools: tools.schemas,
                 signal: currentAbortController.signal,
                 onToken: (delta, isThinking = false) => {
@@ -838,6 +868,7 @@ async function handleSlashCommand(input) {
             console.log(`\n${C.green}✔ Switched model to: ${activeModel.name || activeModel.id} (${activeModel.id})${C.reset}`);
             console.log(`  ${C.gray}Session memory preserved & shared across models in:${C.reset}`);
             console.log(`  ${C.cyan}${currentSessionDir}/memory.json${C.reset}\n`);
+            renderHeaderBanner();
             return;
         }
     }
