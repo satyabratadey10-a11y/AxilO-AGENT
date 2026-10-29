@@ -352,7 +352,17 @@ async function callAI({ activeModel, chatHistory = [], promptText, SYSTEM_PROMPT
         });
 
         if (!response.ok) {
-            const errText = await response.text();
+            let errText = await response.text();
+            if (errText.includes('<html') || errText.includes('<!DOCTYPE') || errText.includes('<!doctype')) {
+                if (response.status === 530 || errText.includes('1033') || errText.includes('Cloudflare Tunnel error')) {
+                    errText = 'Cloudflare Tunnel Offline (HTTP 530 / Error 1033): The Google Colab GPU tunnel is temporarily unreachable. Run "python3 colab_daemon.py" or check Colab session.';
+                } else if (response.status === 524) {
+                    errText = 'Cloudflare Timeout (HTTP 524): The generation took longer than Cloudflare deadline (100s).';
+                } else {
+                    const titleMatch = errText.match(/<title>([^<]+)<\/title>/i);
+                    errText = titleMatch ? titleMatch[1].trim() : `HTTP ${response.status} Server Error`;
+                }
+            }
             throw new Error(`OpenAI API ${response.status}: ${errText}`);
         }
 
