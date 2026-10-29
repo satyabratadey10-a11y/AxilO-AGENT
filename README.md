@@ -15,6 +15,8 @@ An elite, autonomous terminal-first AI agent and reverse-engineering orchestrato
 
 - **Dedicated Session Directories & Shared Memory**: Every session gets an isolated directory in `~/.axilo/sessions/session_<timestamp>_<id>/` with `memory.json` (conversational history) and `session.json` (metadata). Switching models mid-session via `/model <id>` retains complete shared context seamlessly.
 - **Google Colab Tesla T4 GPU Acceleration**: Run local state-of-the-art models (Qwen 3.5 9B / Qwen 3.8) for free on 16GB Tesla T4 GPUs with Flash Attention (`OLLAMA_FLASH_ATTENTION=1`), 24h keep-alive, and self-healing Cloudflare Tunnels maintained by `colab_daemon.py`.
+- **Maximized Context Window (32,768 Tokens)**: Eliminates the default 2,048 token limit that previously caused mid-sentence generation cutoffs. Fully backed by a 32K KV cache and Flash Attention on Tesla T4 VRAM, enabling uninterrupted multi-turn code analysis and large APK decompilations.
+- **1-Command Auto-Boot Runners**: Start and configure the Colab GPU environment in one command using any runtime: `python run_qwen.py`, `bash run_qwen.sh`, or `node run_qwen.js`.
 - **Dual-Mode Command Execution**:
   - **Synchronous**: Fast execution with real-time spinner, duration timer, and output snippets.
   - **Background Tasks**: Long-running builds, servers, or watchers spawned asynchronously (`is_background: true`) with Task IDs and log streaming to `~/.axilo/tasks/<id>.log`. Managed via `/tasks`.
@@ -27,12 +29,15 @@ An elite, autonomous terminal-first AI agent and reverse-engineering orchestrato
 ## 📁 System Architecture
 
 ```
-~/.axilo/
+~/.axilo/ (and ~/ for launchers)
+├── run_qwen.py           # Unified auto-boot runner (Colab T4 session, Ollama, tunnel, models.json)
+├── run_qwen.sh           # Bash one-click wrapper for run_qwen.py
+├── run_qwen.js           # Node.js wrapper for run_qwen.py
 ├── agent.js              # Core orchestrator loop, TUI, slash commands & tool calling
 ├── connection.js         # Multi-provider API gateway (AgentRouter, Anthropic, OpenAI, Colab)
 ├── tools.js              # Native tool registry (Bash, Tasks, APK Analysis, Filesystem)
-├── models.json           # Model configurations, endpoints, and credentials
-├── setup_qwen_colab.py   # GPU provisioning script for Google Colab (Ollama + T4 + Tunnel)
+├── models.json           # Model configurations, endpoints, context limits & credentials
+├── setup_qwen_colab.py   # GPU provisioning script for Google Colab (Ollama + T4 + 32K Context + Tunnel)
 ├── colab_daemon.py       # Keepalive & auto-healing daemon preventing Colab idle pruning
 ├── skills/               # Installed skill guides & reverse engineering methodology
 │   ├── rea.md            # Reverse Engineer Anything guidelines
@@ -97,37 +102,51 @@ Inside the running AxilO CLI, use slash commands to manage models, sessions, tas
 
 ## 🤖 Running Qwen 3.5 on Google Colab GPU
 
-AxilO includes full automation to run large open-weights models (Qwen 3.5 9B / Qwen 3.8) accelerated by Google Colab's 16GB Tesla T4 GPU:
+AxilO includes 1-command automation to run large open-weights models (**Qwen 3.5 9B / Qwen 3.8**) accelerated by Google Colab's 16GB Tesla T4 GPU with **32,768 context tokens**.
 
-### 1. One-Click Keepalive Daemon
-To ensure Google Colab never disconnects due to idle timeouts and the public Cloudflare tunnel stays online indefinitely, run the auto-healing daemon in the background:
+### 1. One-Click Launchers (Python / Bash / Node.js)
+
+Run any of the following commands from your home directory or `~/.axilo`:
 
 ```bash
-python3 ~/.axilo/colab_daemon.py &
+# Via Python
+python run_qwen.py
+
+# Via Bash
+bash run_qwen.sh
+
+# Via Node.js
+node run_qwen.js
 ```
 
-The daemon automatically:
-1. Connects to or creates the `qwen-t4` session with Tesla T4 GPU using Colab CLI.
-2. Installs Ollama with Flash Attention (`OLLAMA_FLASH_ATTENTION=1`) and 24h keep-alive.
-3. Pulls `qwen3.5:9b`, creates aliases (`qwen3.5`, `qwen3.8`), and warms up VRAM.
-4. Exposes the API via a public Cloudflare Tunnel.
-5. Automatically updates `~/.axilo/models.json` with the active live endpoint.
-6. Emits periodic kernel heartbeats every 30 seconds to prevent Google Colab from idling out or shutting down the VM.
+### What Happens Automatically:
+1. **GPU Provisioning**: Checks Google Colab for an active `qwen-t4` session; if not found, provisions a fresh session with a **Tesla T4 GPU** (`colab new --session qwen-t4 --gpu T4`).
+2. **Context Window Maximization (32K Tokens)**: Configures Ollama with a custom Modelfile setting `PARAMETER num_ctx 32768`, enabling 32,768 tokens of active context memory with Flash Attention.
+3. **Cloudflare Tunnel Deployment**: Starts a public Cloudflare tunnel (`https://*.trycloudflare.com/v1`) exposing Ollama's OpenAI-compatible API.
+4. **Auto-Configures `models.json`**: Automatically updates all Colab Qwen model entries with the live tunnel URL, `contextTokens: 32768`, `maxTokens: 8192`, and `options: { num_ctx: 32768 }`.
+5. **Background Auto-Healing Daemon**: Spawns `colab_daemon.py` in the background with a 30-second kernel heartbeat to guarantee Google Colab never disconnects due to inactivity.
 
-### 2. Manual Setup (Alternative)
-```bash
-# Create session on Colab with T4 GPU
-colab new --session qwen-t4 --gpu T4
+### 2. Switching to the Model in AxilO
 
-# Execute automated GPU setup script
-colab exec -s qwen-t4 -f ~/.axilo/setup_qwen_colab.py --timeout 600
-```
+Once the runner completes, switch to Qwen in your AxilO terminal:
 
-Once running, switch to the model in AxilO:
 ```text
 ❯ /model qwen3.5:9b
-✔ Switched model to: Qwen 3.5 9B (Google Colab T4 GPU)
+✔ Switched model to: Qwen 3.5 9B (Google Colab T4 GPU) (qwen3.5:9b)
+  Session memory preserved & shared across models in:
+  /data/data/com.termux/files/home/.axilo/sessions/session_.../memory.json
 ```
+
+### 3. Context Limit & Hardware Specifications
+
+| Parameter | Configuration | Description |
+| :--- | :--- | :--- |
+| **GPU Hardware** | Tesla T4 (16GB GDDR6 VRAM) | Dedicated Google Colab cloud accelerator |
+| **Model** | `qwen3.5:9b` (Aliases: `qwen3.8`, `qwen-3.5-9b`) | High-reasoning agent model |
+| **Context Limit** | **32,768 Tokens** (`num_ctx 32768`) | 16× larger than default Ollama (2048) |
+| **Max Output** | **8,192 Tokens** (`max_tokens 8192`) | Long-form code generations & diffs |
+| **Attention Kernel** | `OLLAMA_FLASH_ATTENTION=1` | Zero OOM risk, optimal KV cache usage |
+| **Keepalive** | 30s Heartbeat (`colab_daemon.py`) | Continuous kernel wakeups prevent idle timeout |
 
 ---
 

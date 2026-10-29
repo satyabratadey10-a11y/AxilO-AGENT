@@ -336,6 +336,13 @@ async function callAI({ activeModel, chatHistory = [], promptText, SYSTEM_PROMPT
             stream: !!activeModel.stream
         };
 
+        // Pass options (e.g. num_ctx) for Ollama / Colab OpenAI compatibility endpoint
+        if (activeModel.options || activeModel.contextTokens || activeModel.num_ctx) {
+            body.options = activeModel.options || {
+                num_ctx: activeModel.contextTokens || activeModel.num_ctx || 32768
+            };
+        }
+
         if (openAITools.length > 0) {
             body.tools = openAITools;
             // CRITICAL: Omit reasoning_effort when tools are attached!
