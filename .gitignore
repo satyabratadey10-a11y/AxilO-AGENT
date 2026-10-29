@@ -13,6 +13,8 @@ models.json
 # 4. Agent Runtime Memory & State
 history.json
 sessions.json
+sessions/
+tasks/
 
 # 5. Logs and Debugging
 *.log

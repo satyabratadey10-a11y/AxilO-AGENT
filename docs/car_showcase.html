@@ -1,0 +1,2372 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VOLTAIC X1 — Electric Hypercar Concept</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        carbon: '#080808',
+                        titanium: '#111111',
+                        steel: '#1a1a1a',
+                        plasma: '#00e5ff',
+                        ember: '#ff3d00',
+                        smoke: '#9ca3af',
+                        ash: '#6b7280'
+                    },
+                    fontFamily: {
+                        display: ['"Space Grotesk"', 'sans-serif'],
+                        body: ['"Inter"', 'sans-serif'],
+                        data: ['"JetBrains Mono"', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+        body {
+            background-color: #080808;
+            color: #e5e7eb;
+        }
+        .glow-line {
+            box-shadow: 0 0 8px rgba(0, 229, 255, 0.6), 0 0 20px rgba(0, 229, 255, 0.2);
+        }
+        .ember-glow {
+            box-shadow: 0 0 8px rgba(255, 61, 0, 0.6), 0 0 20px rgba(255, 61, 0, 0.2);
+        }
+        .spec-grid-item {
+            border-bottom: 1px solid #1a1a1a;
+            border-right: 1px solid #1a1a1a;
+        }
+        .spec-grid-item:nth-child(4n) { border-right: none; }
+        @media (max-width: 767px) {
+            .spec-grid-item { border-right: none; }
+        }
+        .config-option {
+            transition: all 200ms ease-out;
+        }
+        .config-option:hover {
+            transform: translateY(-2px);
+        }
+        .config-option.active {
+            border-color: #00e5ff;
+            box-shadow: 0 0 12px rgba(0, 229, 255, 0.3);
+        }
+        .config-option:active {
+            transform: scale(0.97);
+        }
+        .hero-reveal {
+            animation: heroFadeUp 1s ease-out forwards;
+            opacity: 0;
+        }
+        .hero-reveal-delay-1 { animation-delay: 0.2s; }
+        .hero-reveal-delay-2 { animation-delay: 0.4s; }
+        .hero-reveal-delay-3 { animation-delay: 0.6s; }
+        @keyframes heroFadeUp {
+            from { opacity: 0; transform: translateY(24px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .scroll-reveal {
+            opacity: 0;
+            transform: translateY(16px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+        .scroll-reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .pulse-dot {
+            animation: pulseDot 2s ease-in-out infinite;
+        }
+        @keyframes pulseDot {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        .price-counter {
+            transition: all 300ms ease-out;
+        }
+        :focus-visible {
+            outline: 2px solid #00e5ff;
+            outline-offset: 2px;
+        }
+    </style>
+</head>
+<body class="font-body antialiased">
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:bg-titanium focus:text-plasma focus:px-4 focus:py-2 focus:rounded">Skip to main content</a>
+
+    <header class="fixed top-0 left-0 right-0 z-40 bg-carbon/90 backdrop-blur-md border-b border-steel/50">
+        <nav class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between" aria-label="Primary navigation">
+            <a href="#" class="font-display font-bold text-xl tracking-wider text-white">VOLTAIC</a>
+            <div class="hidden md:flex items-center gap-8">
+                <a href="#specs" class="text-sm font-medium text-smoke hover:text-plasma transition-colors duration-200">Specifications</a>
+                <a href="#configure" class="text-sm font-medium text-smoke hover:text-plasma transition-colors duration-200">Configure</a>
+                <a href="#engineering" class="text-sm font-medium text-smoke hover:text-plasma transition-colors duration-200">Engineering</a>
+            </div>
+            <button id="mobile-menu-btn" class="md:hidden text-smoke hover:text-plasma transition-colors duration-200 p-2" aria-label="Open menu" aria-expanded="false">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/></svg>
+            </button>
+        </nav>
+        <div id="mobile-menu" class="hidden md:hidden border-t border-steel/50 bg-carbon/95 backdrop-blur-md">
+            <div class="px-6 py-4 flex flex-col gap-4">
+                <a href="#specs" class="text-sm font-medium text-smoke hover:text-plasma transition-colors duration-200 py-2">Specifications</a>
+                <a href="#configure" class="text-sm font-medium text-smoke hover:text-plasma transition-colors duration-200 py-2">Configure</a>
+                <a href="#engineering" class="text-sm font-medium text-smoke hover:text-plasma transition-colors duration-200 py-2">Engineering</a>
+            </div>
+        </div>
+    </header>
+
+    <main id="main-content">
+        <section class="relative min-h-dvh flex items-center justify-center pt-16 overflow-hidden" aria-label="Hero presentation">
+            <div class="absolute inset-0 bg-gradient-to-b from-carbon via-carbon to-titanium"></div>
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-plasma/5 rounded-full blur-3xl"></div>
+            <div class="absolute top-1/3 right-1/4 w-[300px] h-[300px] bg-ember/5 rounded-full blur-3xl"></div>
+            <div class="relative z-10 max-w-7xl mx-auto px-6 text-center">
+                <p class="hero-reveal font-data text-xs tracking-[0.3em] text-plasma uppercase mb-6">Concept Prototype 2026</p>
+                <h1 class="hero-reveal hero-reveal-delay-1 font-display font-bold text-6xl md:text-8xl lg:text-9xl tracking-tight text-white leading-none">VOLTAIC X1</h1>
+                <p class="hero-reveal hero-reveal-delay-2 mt-6 font-display text-lg md:text-xl text-smoke max-w-xl mx-auto leading-relaxed">Where aerodynamic sculpture meets raw electric force. Zero emissions. Zero compromise.</p>
+                <div class="hero-reveal hero-reveal-delay-3 mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+                    <a href="#configure" class="inline-flex items-center justify-center px-8 py-4 bg-plasma text-carbon font-display font-semibold text-sm tracking-wider rounded hover:bg-plasma/90 active:scale-[0.97] transition-all duration-200 cursor-pointer">Configure Yours</a>
+                    <a href="#specs" class="inline-flex items-center justify-center px-8 py-4 border border-smoke/30 text-smoke font-display font-medium text-sm tracking-wider rounded hover:border-plasma hover:text-plasma active:scale-[0.97] transition-all duration-200 cursor-pointer">View Specifications</a>
+                </div>
+                <div class="hero-reveal hero-reveal-delay-3 mt-16 grid grid-cols-3 gap-8 max-w-lg mx-auto">
+                    <div>
+                        <p class="font-data text-2xl md:text-3xl text-white font-semibold" aria-label="1.9 seconds to 100 kilometers per hour">1.9<span class="text-plasma">s</span></p>
+                        <p class="text-xs text-ash mt-1 tracking-wide uppercase">0–100 km/h</p>
+                    </div>
+                    <div>
+                        <p class="font-data text-2xl md:text-3xl text-white font-semibold" aria-label="412 kilometers per hour top speed">412<span class="text-plasma">km/h</span></p>
+                        <p class="text-xs text-ash mt-1 tracking-wide uppercase">Top Speed</p>
+                    </div>
+                    <div>
+                        <p class="font-data text-2xl md:text-3xl text-white font-semibold" aria-label="1200 kilowatts power">1200<span class="text-plasma">kW</span></p>
+                        <p class="text-xs text-ash mt-1 tracking-wide uppercase">Peak Power</p>
+                    </div>
+                </div>
+            </div>
+            <div class="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-plasma/40 to-transparent glow-line"></div>
+        </section>
+
+        <section id="specs" class="py-24 md:py-32 bg-titanium" aria-label="Mechanical and aerodynamic data matrix">
+            <div class="max-w-7xl mx-auto px-6">
+                <div class="scroll-reveal mb-16">
+                    <p class="font-data text-xs tracking-[0.3em] text-plasma uppercase mb-3">Performance Data</p>
+                    <h2 class="font-display font-bold text-4xl md:text-5xl text-white tracking-tight">The Numbers</h2>
+                </div>
+                <div class="scroll-reveal grid grid-cols-2 md:grid-cols-4 border-l border-t border-steel/50">
+                    <div class="spec-grid-item p-6 md:p-8">
+                        <p class="font-data text-3xl md:text-4xl text-white font-semibold">1.9<span class="text-plasma text-lg">s</span></p>
+                        <p class="text-sm text-ash mt-2">0–100 km/h</p>
+                        <p class="text-xs text-smoke/60 mt-1">Launch Control Active</p>
+                    </div>
+                    <div class="spec-grid-item p-6 md:p-8">
+                        <p class="font-data text-3xl md:text-4xl text-white font-semibold">412<span class="text-plasma text-lg">km/h</span></p>
+                        <p class="text-sm text-ash mt-2">Top Speed</p>
+                        <p class="text-xs text-smoke/60 mt-1">Delimited Mode</p>
+                    </div>
+                    <div class="spec-grid-item p-6 md:p-8">
+                        <p class="font-data text-3xl md:text-4xl text-white font-semibold">1200<span class="text-plasma text-lg">kW</span></p>
+                        <p class="text-sm text-ash mt-2">Peak Power</p>
+                        <p class="text-xs text-smoke/60 mt-1">Tri-Motor Array</p>
+                    </div>
+                    <div class="spec-grid-item p-6 md:p-8">
+                        <p class="font-data text-3xl md:text-4xl text-white font-semibold">1600<span class="text-plasma text-lg">Nm</span></p>
+                        <p class="text-sm text-ash mt-2">Peak Torque</p>
+                        <p class="text-xs text-smoke/60 mt-1">Instant Response</p>
+                    </div>
+                    <div class="spec-grid-item p-6 md:p-8">
+                        <p class="font-data text-3xl md:text-4xl text-white font-semibold">800<span class="text-plasma text-lg">km</span></p>
+                        <p class="text-sm text-ash mt-2">Range (WLTP)</p>
+                        <p class="text-xs text-smoke/60 mt-1">200 kWh Solid-State</p>
+                    </div>
+                    <div class="spec-grid-item p-6 md:p-8">
+                        <p class="font-data text-3xl md:text-4xl text-white font-semibold">0.208</p>
+                        <p class="text-sm text-ash mt-2">Drag Coefficient</p>
+                        <p class="text-xs text-smoke/60 mt-1">Active Aero Profile</p>
+                    </div>
+                    <div class="spec-grid-item p-6 md:p-8">
+                        <p class="font-data text-3xl md:text-4xl text-white font-semibold">1298<span class="text-plasma text-lg">kg</span></p>
+                        <p class="text-sm text-ash mt-2">Curb Weight</p>
+                        <p class="text-xs text-smoke/60 mt-1">Carbon Fiber Monocoque</p>
+                    </div>
+                    <div class="spec-grid-item p-6 md:p-8">
+                        <p class="font-data text-3xl md:text-4xl text-white font-semibold">12<span class="text-plasma text-lg">min</span></p>
+                        <p class="text-sm text-ash mt-2">10–80% Charge</p>
+                        <p class="text-xs text-smoke/60 mt-1">800V Architecture</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="configure" class="py-24 md:py-32 bg-carbon" aria-label="Interactive vehicle configurator">
+            <div class="max-w-7xl mx-auto px-6">
+                <div class="scroll-reveal mb-16">
+                    <p class="font-data text-xs tracking-[0.3em] text-plasma uppercase mb-3">Build Yours</p>
+                    <h2 class="font-display font-bold text-4xl md:text-5xl text-white tracking-tight">Configure</h2>
+                </div>
+                <div class="scroll-reveal grid lg:grid-cols-5 gap-8">
+                    <div class="lg:col-span-3 bg-titanium rounded-lg border border-steel/50 p-8 relative overflow-hidden">
+                        <div class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-plasma/30 to-transparent"></div>
+                        <div id="config-visual" class="aspect-[16/9] bg-steel/30 rounded flex items-center justify-center relative overflow-hidden">
+                            <div class="absolute inset-0 bg-gradient-to-br from-plasma/5 to-transparent"></div>
+                            <div class="text-center relative z-10">
+                                <svg id="car-silhouette" class="w-48 md:w-64 mx-auto transition-all duration-500" viewBox="0 0 400 120" fill="none" aria-hidden="true">
+                                    <path id="car-body" d="M40 80 L60 80 L80 50 L140 35 L280 35 L340 50 L360 80 L380 80 L380 90 L360 95 L40 95 L20 90 Z" fill="#1a1a1a" stroke="#00e5ff" stroke-width="1.5"/>
+                                    <circle id="wheel-rear" cx="90" cy="90" r="18" fill="#111111" stroke="#00e5ff" stroke-width="1.5"/>
+                                    <circle id="wheel-front" cx="310" cy="90" r="18" fill="#111111" stroke="#00e5ff" stroke-width="1.5"/>
+                                    <path id="car-window" d="M100 50 L130 38 L270 38 L310 50 Z" fill="#00e5ff" fill-opacity="0.1" stroke="#00e5ff" stroke-width="0.75"/>
+                                    <line id="aero-line-1" x1="80" y1="65" x2="350" y2="65" stroke="#00e5ff" stroke-width="0.5" stroke-opacity="0.3"/>
+                                    <line id="aero-line-2" x1="100" y1="72" x2="340" y2="72" stroke="#00e5ff" stroke-width="0.5" stroke-opacity="0.2"/>
+                                </svg>
+                                <p id="config-label" class="font-display text-sm text-smoke mt-4 tracking-wider">VOLTAIC X1 — <span id="config-trim-label">PHANTOM</span></p>
+                            </div>
+                        </div>
+                        <div class="mt-6 flex items-center justify-between border-t border-steel/50 pt-6">
+                            <div>
+                                <p class="text-xs text-ash uppercase tracking-wider">Estimated Total</p>
+                                <p id="total-price" class="font-data text-3xl text-white font-semibold price-counter">$2,450,000</p>
+                            </div>
+                            <button id="reserve-btn" class="px-6 py-3 bg-ember text-white font-display font-semibold text-sm tracking-wider rounded hover:bg-ember/90 active:scale-[0.97] transition-all duration-200 cursor-pointer">Reserve</button>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-2 space-y-6">
+                        <div>
+                            <p class="font-display text-sm font-medium text-smoke mb-3 tracking-wider uppercase">Trim Level</p>
+                            <div class="grid grid-cols-1 gap-3" role="radiogroup" aria-label="Select trim level">
+                                <button class="config-option active text-left p-4 border border-steel/50 rounded bg-titanium cursor-pointer" data-group="trim" data-value="phantom" data-price="0" role="radio" aria-checked="true">
+                                    <p class="font-display font-semibold text-white text-sm">Phantom</p>
+                                    <p class="text-xs text-ash mt-1">Base performance — 1,200 kW</p>
+                                    <p class="font-data text-xs text-plasma mt-2">Included</p>
+                                </button>
+                                <button class="config-option text-left p-4 border border-steel/50 rounded bg-titanium cursor-pointer" data-group="trim" data-value="spectre" data-price="350000" role="radio" aria-checked="false">
+                                    <p class="font-display font-semibold text-white text-sm">Spectre</p>
+                                    <p class="text-xs text-ash mt-1">Enhanced aero — 1,400 kW</p>
+                                    <p class="font-data text-xs text-plasma mt-2">+$350,000</p>
+                                </button>
+                                <button class="config-option text-left p-4 border border-steel/50 rounded bg-titanium cursor-pointer" data-group="trim" data-value="apex" data-price="800000" role="radio" aria-checked="false">
+                                    <p class="font-display font-semibold text-white text-sm">Apex</p>
+                                    <p class="text-xs text-ash mt-1">Unlimited — 1,600 kW, track package</p>
+                                    <p class="font-data text-xs text-plasma mt-2">+$800,000</p>
+                                </button>
+                            </div>
+                        </div>
+                        <div>
+                            <p class="font-display text-sm font-medium text-smoke mb-3 tracking-wider uppercase">Exterior Color</p>
+                            <div class="flex gap-3" role="radiogroup" aria-label="Select exterior color">
+                                <button class="config-option active w-12 h-12 rounded-full border-2 border-plasma cursor-pointer" data-group="color" data-value="void-black" data-color="#111111" data-price="0" aria-label="Void Black, included" role="radio" aria-checked="true" style="background:#111111"></button>
+                                <button class="config-option w-12 h-12 rounded-full border-2 border-steel/50 cursor-pointer" data-group="color" data-value="plasma-cyan" data-color="#00e5ff" data-price="25000" aria-label="Plasma Cyan, plus $25,000" role="radio" aria-checked="false" style="background:#00e5ff"></button>
+                                <button class="config-option w-12 h-12 rounded-full border-2 border-steel/50 cursor-pointer" data-group="color" data-value="ember-red" data-color="#ff3d00" data-price="25000" aria-label="Ember Red, plus $25,000" role="radio" aria-checked="false" style="background:#ff3d00"></button>
+                                <button class="config-option w-12 h-12 rounded-full border-2 border-steel/50 cursor-pointer" data-group="color" data-value="solar-white" data-color="#e5e7eb" data-price="25000" aria-label="Solar White, plus $25,000" role="radio" aria-checked="false" style="background:#e5e7eb"></button>
+                            </div>
+                        </div>
+                        <div>
+                            <p class="font-display text-sm font-medium text-smoke mb-3 tracking-wider uppercase">Wheels</p>
+                            <div class="grid grid-cols-2 gap-3" role="radiogroup" aria-label="Select wheel type">
+                                <button class="config-option active text-left p-3 border border-steel/50 rounded bg-titanium cursor-pointer" data-group="wheels" data-value="aero-20" data-price="0" role="radio" aria-checked="true">
+                                    <p class="font-display text-sm text-white font-medium">20" Aero</p>
+                                    <p class="font-data text-xs text-plasma mt-1">Included</p>
+                                </button>
+                                <button class="config-option text-left p-3 border border-steel/50 rounded bg-titanium cursor-pointer" data-group="wheels" data-value="forged-21" data-price="42000" role="radio" aria-checked="false">
+                                    <p class="font-display text-sm text-white font-medium">21" Forged</p>
+                                    <p class="font-data text-xs text-plasma mt-1">+$42,000</p>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="engineering" class="py-24 md:py-32 bg-titanium" aria-label="Structural and engineering specifications">
+            <div class="max-w-7xl mx-auto px-6">
+                <div class="scroll-reveal mb-16">
+                    <p class="font-data text-xs tracking-[0.3em] text-plasma uppercase mb-3">Engineering Blueprint</p>
+                    <h2 class="font-display font-bold text-4xl md:text-5xl text-white tracking-tight">Under The Surface</h2>
+                </div>
+                <div class="scroll-reveal grid md:grid-cols-2 gap-12">
+                    <div class="space-y-8">
+                        <article class="border-l-2 border-plasma pl-6">
+                            <h3 class="font-display font-semibold text-lg text-white">Powertrain</h3>
+                            <p class="text-sm text-smoke mt-2 leading-relaxed">Tri-motor electric architecture featuring one high-efficiency permanent magnet synchronous motor per rear wheel and a single front axle motor. Combined output: 1,200 kW (1,632 PS) with torque vectoring across the rear axle for precision cornering at any speed.</p>
+                        </article>
+                        <article class="border-l-2 border-ember pl-6">
+                            <h3 class="font-display font-semibold text-lg text-white">Battery System</h3>
+                            <p class="text-sm text-smoke mt-2 leading-relaxed">200 kWh solid-state lithium-sulfur cells arranged in a structural floor pack. 800V architecture enables 350 kW DC fast charging — 10% to 80% in 12 minutes. Predicted cycle life exceeds 2,000 full charges with less than 8% degradation.</p>
+                        </article>
+                        <article class="border-l-2 border-smoke pl-6">
+                            <h3 class="font-display font-semibold text-lg text-white">Chassis</h3>
+                            <p class="text-sm text-smoke mt-2 leading-relaxed">Full carbon fiber monocoque with integrated roll protection. Dry weight: 1,298 kg. Front and rear subframes are machined from billet aluminum. Active suspension with predictive road scanning via front-facing LiDAR.</p>
+                        </article>
+                    </div>
+                    <div class="space-y-8">
+                        <article class="border-l-2 border-plasma pl-6">
+                            <h3 class="font-display font-semibold text-lg text-white">Aerodynamics</h3>
+                            <p class="text-sm text-smoke mt-2 leading-relaxed">Active aerodynamic surfaces include a deployable rear wing generating 820 kg of downforce at 300 km/h, front splitter with three-position adjustment, and underbody diffuser channels. Cd 0.208 in low-drag mode, Cd 0.34 in maximum downforce configuration.</p>
+                        </article>
+                        <article class="border-l-2 border-ember pl-6">
+                            <h3 class="font-display font-semibold text-lg text-white">Braking</h3>
+                            <p class="text-sm text-smoke mt-2 leading-relaxed">Carbon-ceramic discs (420 mm front, 390 mm rear) with 8-piston front calipers. Regenerative braking provides up to 400 kW of recuperation. Emergency braking from 100–0 km/h in 28 meters with pedestrian detection override.</p>
+                        </article>
+                        <article class="border-l-2 border-smoke pl-6">
+                            <h3 class="font-display font-semibold text-lg text-white">Connectivity</h3>
+                            <p class="text-sm text-smoke mt-2 leading-relaxed">Full over-the-air update capability for powertrain calibration, suspension mapping, and aerodynamic profiles. 5G telemetry with real-time track analytics. Vehicle-to-vehicle communication for platoon efficiency on controlled corridors.</p>
+                        </article>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="border-t border-steel/50 bg-carbon py-12">
+        <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6">
+            <p class="font-display font-bold text-sm tracking-wider text-smoke">VOLTAIC</p>
+            <p class="text-xs text-ash">Concept prototype. Specifications subject to homologation approval.</p>
+            <div class="flex gap-6">
+                <a href="#" class="text-xs text-ash hover:text-plasma transition-colors duration-200">Privacy</a>
+                <a href="#" class="text-xs text-ash hover:text-plasma transition-colors duration-200">Terms</a>
+                <a href="#" class="text-xs text-ash hover:text-plasma transition-colors duration-200">Contact</a>
+            </div>
+        </div>
+    </footer>
+
+    <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-3" aria-live="polite"></div>
+
+    <script>
+        (function() {
+            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+            if (mobileMenuBtn && mobileMenu) {
+                mobileMenuBtn.addEventListener('click', function() {
+                    const isOpen = !mobileMenu.classList.contains('hidden');
+                    mobileMenu.classList.toggle('hidden');
+                    mobileMenuBtn.setAttribute('aria-expanded', String(!isOpen));
+                });
+                mobileMenu.querySelectorAll('a').forEach(function(link) {
+                    link.addEventListener('click', function() {
+                        mobileMenu.classList.add('hidden');
+                        mobileMenuBtn.setAttribute('aria-expanded', 'false');
+                    });
+                });
+            }
+
+            const BASE_PRICE = 2450000;
+            const configState = { trim: 0, color: 0, wheels: 0 };
+            const configLabels = { trim: 'PHANTOM', color: 'VOID BLACK', wheels: '20" AERO' };
+
+            function updatePrice() {
+                const total = BASE_PRICE + configState.trim + configState.color + configState.wheels;
+                const el = document.getElementById('total-price');
+                if (el) {
+                    el.textContent = '<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VOLTAIC X1 — Electric Hypercar Concept</title>
+<meta name="description" content="VOLTAIC X1: 2,400 hp quad-motor electric hypercar concept. 0-100 km/h in 1.72s. 412 km/h top speed.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        volt: '#C8FF00',
+        'volt-dim': '#8AAD00',
+        carbon: '#0A0A0A',
+        'carbon-mid': '#141414',
+        'carbon-light': '#1E1E1E',
+        'carbon-border': '#2A2A2A',
+        'carbon-text': '#A0A0A0',
+        'carbon-muted': '#5A5A5A',
+      },
+      fontFamily: {
+        display: ['"Space Grotesk"', 'sans-serif'],
+        mono: ['"JetBrains Mono"', 'monospace'],
+      },
+    }
+  }
+}
+</script>
+<style>
+  @keyframes hero-glow {
+    0%, 100% { opacity: 0.3; transform: scale(1); }
+    50% { opacity: 0.6; transform: scale(1.05); }
+  }
+  @keyframes dash-flow {
+    to { stroke-dashoffset: -20; }
+  }
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes pulse-ring {
+    0% { transform: scale(1); opacity: 0.6; }
+    100% { transform: scale(1.8); opacity: 0; }
+  }
+  @keyframes counter-tick {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+  .animate-hero-glow { animation: hero-glow 4s ease-in-out infinite; }
+  .animate-dash-flow { animation: dash-flow 1s linear infinite; }
+  .animate-fade-up { animation: fade-up 0.8s ease-out forwards; opacity: 0; }
+  .animate-fade-up-d1 { animation-delay: 0.1s; }
+  .animate-fade-up-d2 { animation-delay: 0.2s; }
+  .animate-fade-up-d3 { animation-delay: 0.3s; }
+  .animate-fade-up-d4 { animation-delay: 0.4s; }
+  .animate-fade-up-d5 { animation-delay: 0.5s; }
+  .animate-fade-up-d6 { animation-delay: 0.6s; }
+  .animate-fade-up-d7 { animation-delay: 0.7s; }
+  .pulse-ring { animation: pulse-ring 1.5s ease-out infinite; }
+  .counter-tick { animation: counter-tick 2s ease-in-out infinite; }
+  .scroll-reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease-out, transform 0.6s ease-out; }
+  .scroll-reveal.visible { opacity: 1; transform: translateY(0); }
+  .config-option { transition: all 0.2s ease-out; }
+  .config-option:hover { transform: translateY(-2px); }
+  .config-option.active { border-color: #C8FF00 !important; box-shadow: 0 0 20px rgba(200, 255, 0, 0.15); }
+  .spec-row { transition: background-color 0.2s ease; }
+  .spec-row:hover { background-color: rgba(200, 255, 0, 0.03); }
+  .nav-link { position: relative; }
+  .nav-link::after { content: ''; position: absolute; bottom: -2px; left: 0; width: 0; height: 1px; background: #C8FF00; transition: width 0.3s ease; }
+  .nav-link:hover::after { width: 100%; }
+  .hero-stat-value { font-variant-numeric: tabular-nums; }
+  .grid-line { stroke: #2A2A2A; stroke-width: 0.5; }
+  @media (prefers-reduced-motion: reduce) {
+    .animate-hero-glow, .animate-dash-flow, .pulse-ring, .counter-tick { animation: none; }
+    .scroll-reveal { opacity: 1; transform: none; transition: none; }
+    .animate-fade-up { animation: none; opacity: 1; }
+    .config-option:hover { transform: none; }
+  }
+  ::selection { background: rgba(200, 255, 0, 0.3); color: #fff; }
+  :focus-visible { outline: 2px solid #C8FF00; outline-offset: 2px; }
+  body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+</style>
+</head>
+<body class="bg-carbon text-white font-display antialiased">
+
+<a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-volt focus:text-carbon focus:font-semibold focus:rounded">Skip to main content</a>
+
+<header class="fixed top-0 left-0 right-0 z-40 border-b border-carbon-border/50" style="background: rgba(10,10,10,0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);">
+  <nav class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between" aria-label="Primary navigation">
+    <a href="#" class="flex items-center gap-3 group" aria-label="VOLTAIC home">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+        <path d="M14 2L2 26h10l2-8 2 8h10L14 2z" fill="#C8FF00" opacity="0.9"/>
+        <path d="M14 10l-5 12h3l2-6 2 6h3L14 10z" fill="#0A0A0A"/>
+      </svg>
+      <span class="text-sm font-semibold tracking-[0.3em] text-white group-hover:text-volt transition-colors duration-200">VOLTAIC</span>
+    </a>
+    <div class="hidden md:flex items-center gap-8">
+      <a href="#hero" class="nav-link text-xs font-medium tracking-[0.2em] text-carbon-text hover:text-white transition-colors duration-200">X1</a>
+      <a href="#performance" class="nav-link text-xs font-medium tracking-[0.2em] text-carbon-text hover:text-white transition-colors duration-200">PERFORMANCE</a>
+      <a href="#configure" class="nav-link text-xs font-medium tracking-[0.2em] text-carbon-text hover:text-white transition-colors duration-200">CONFIGURE</a>
+      <a href="#specifications" class="nav-link text-xs font-medium tracking-[0.2em] text-carbon-text hover:text-white transition-colors duration-200">SPECS</a>
+    </div>
+    <button id="mobile-menu-btn" class="md:hidden p-2 text-carbon-text hover:text-white transition-colors" aria-label="Toggle menu" aria-expanded="false">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+  </nav>
+  <div id="mobile-menu" class="md:hidden hidden border-t border-carbon-border/50 px-6 py-4 space-y-3" style="background: rgba(10,10,10,0.95);">
+    <a href="#hero" class="block text-xs font-medium tracking-[0.2em] text-carbon-text hover:text-volt py-2">X1</a>
+    <a href="#performance" class="block text-xs font-medium tracking-[0.2em] text-carbon-text hover:text-volt py-2">PERFORMANCE</a>
+    <a href="#configure" class="block text-xs font-medium tracking-[0.2em] text-carbon-text hover:text-volt py-2">CONFIGURE</a>
+    <a href="#specifications" class="block text-xs font-medium tracking-[0.2em] text-carbon-text hover:text-volt py-2">SPECS</a>
+  </div>
+</header>
+
+<main id="main">
+
+<section id="hero" class="relative min-h-screen flex items-center overflow-hidden pt-16">
+  <div class="absolute inset-0 pointer-events-none" aria-hidden="true">
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full animate-hero-glow" style="background: radial-gradient(circle, rgba(200,255,0,0.08) 0%, transparent 70%);"></div>
+    <svg class="absolute inset-0 w-full h-full opacity-[0.04]" aria-hidden="true"><defs><pattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse"><path d="M 60 0 L 0 0 0 60" fill="none" class="grid-line"/></pattern></defs><rect width="100%" height="100%" fill="url(#grid)"/></svg>
+    <div class="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-carbon-border to-transparent"></div>
+  </div>
+  <div class="relative max-w-7xl mx-auto px-6 py-20 w-full">
+    <div class="grid lg:grid-cols-2 gap-16 items-center">
+      <div class="space-y-8">
+        <div class="animate-fade-up">
+          <p class="font-mono text-[10px] tracking-[0.4em] text-volt uppercase mb-4">Concept Prototype 2026</p>
+          <h1 class="text-6xl sm:text-7xl lg:text-8xl font-bold tracking-tight leading-[0.9]">
+            <span class="block text-white">VOLTAIC</span>
+            <span class="block text-volt">X1</span>
+          </h1>
+        </div>
+        <p class="animate-fade-up animate-fade-up-d2 text-carbon-text text-base sm:text-lg leading-relaxed max-w-md font-light">
+          Quad-motor electric hypercar. 2,400 hp directed through four independent axial-flux power units. No transmission. No latency. Pure force, vectorized.
+        </p>
+        <div class="animate-fade-up animate-fade-up-d3 flex flex-wrap gap-4">
+          <a href="#configure" class="inline-flex items-center gap-2 px-6 py-3 bg-volt text-carbon font-semibold text-sm tracking-wide rounded-none hover:bg-volt-dim transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-volt focus-visible:ring-offset-2 focus-visible:ring-offset-carbon">
+            Configure Yours
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+          </a>
+          <a href="#performance" class="inline-flex items-center gap-2 px-6 py-3 border border-carbon-border text-white font-medium text-sm tracking-wide rounded-none hover:border-carbon-text transition-colors duration-200">
+            Explore Data
+          </a>
+        </div>
+      </div>
+      <div class="relative flex items-center justify-center" aria-hidden="true">
+        <svg viewBox="0 0 500 280" class="w-full max-w-lg" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M60 200 Q80 120 140 110 L200 105 Q240 100 260 90 L300 75 Q340 60 380 65 Q420 70 440 90 L450 100" stroke="#C8FF00" stroke-width="1.5" opacity="0.6"/>
+          <path d="M60 200 Q80 130 140 115 L200 110 Q250 105 280 95 L320 80 Q360 65 400 70 L440 85 L450 95" stroke="#C8FF00" stroke-width="0.8" opacity="0.3"/>
+          <path d="M80 210 Q100 140 160 130 L220 125 Q270 120 300 110 L350 95 Q390 80 430 85 L455 100 L460 110 L450 120" stroke="#2A2A2A" stroke-width="1" fill="none"/>
+          <path d="M100 215 Q120 150 180 140 L240 135 Q290 130 320 120 L370 105 Q410 90 445 95 L460 110 L455 125 L440 135 Q400 150 360 155 L300 165 Q240 175 200 180 L140 190 Q100 200 80 215 Z" fill="#141414" stroke="#2A2A2A" stroke-width="0.5"/>
+          <ellipse cx="130" cy="195" rx="28" ry="28" fill="#0A0A0A" stroke="#2A2A2A" stroke-width="1"/>
+          <ellipse cx="130" cy="195" rx="18" ry="18" fill="#141414" stroke="#3A3A3A" stroke-width="0.5"/>
+          <ellipse cx="130" cy="195" rx="6" ry="6" fill="#2A2A2A"/>
+          <ellipse cx="390" cy="140" rx="28" ry="28" fill="#0A0A0A" stroke="#2A2A2A" stroke-width="1"/>
+          <ellipse cx="390" cy="140" rx="18" ry="18" fill="#141414" stroke="#3A3A3A" stroke-width="0.5"/>
+          <ellipse cx="390" cy="140" rx="6" ry="6" fill="#2A2A2A"/>
+          <line x1="200" y1="80" x2="200" y2="60" stroke="#C8FF00" stroke-width="0.5" opacity="0.4" stroke-dasharray="4 4" class="animate-dash-flow"/>
+          <line x1="300" y1="55" x2="300" y2="35" stroke="#C8FF00" stroke-width="0.5" opacity="0.4" stroke-dasharray="4 4" class="animate-dash-flow"/>
+          <circle cx="200" cy="58" r="2" fill="#C8FF00" opacity="0.6"/>
+          <circle cx="300" cy="33" r="2" fill="#C8FF00" opacity="0.6"/>
+          <text x="195" y="52" font-family="JetBrains Mono, monospace" font-size="7" fill="#C8FF00" opacity="0.5">FLUX</text>
+          <text x="295" y="27" font-family="JetBrains Mono, monospace" font-size="7" fill="#C8FF00" opacity="0.5">CORE</text>
+        </svg>
+      </div>
+    </div>
+    <div class="mt-16 pt-8 border-t border-carbon-border/50 grid grid-cols-2 md:grid-cols-4 gap-8">
+      <div class="animate-fade-up animate-fade-up-d4">
+        <p class="font-mono text-[10px] tracking-[0.3em] text-carbon-muted uppercase mb-2">0 – 100 km/h</p>
+        <p class="text-4xl sm:text-5xl font-bold text-white hero-stat-value">1.72<span class="text-volt text-2xl ml-1">s</span></p>
+      </div>
+      <div class="animate-fade-up animate-fade-up-d5">
+        <p class="font-mono text-[10px] tracking-[0.3em] text-carbon-muted uppercase mb-2">Peak Power</p>
+        <p class="text-4xl sm:text-5xl font-bold text-white hero-stat-value">2,400<span class="text-volt text-2xl ml-1">hp</span></p>
+      </div>
+      <div class="animate-fade-up animate-fade-up-d6">
+        <p class="font-mono text-[10px] tracking-[0.3em] text-carbon-muted uppercase mb-2">Top Speed</p>
+        <p class="text-4xl sm:text-5xl font-bold text-white hero-stat-value">412<span class="text-volt text-2xl ml-1">km/h</span></p>
+      </div>
+      <div class="animate-fade-up animate-fade-up-d7">
+        <p class="font-mono text-[10px] tracking-[0.3em] text-carbon-muted uppercase mb-2">Range</p>
+        <p class="text-4xl sm:text-5xl font-bold text-white hero-stat-value">580<span class="text-volt text-2xl ml-1">km</span></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="performance" class="relative py-24 sm:py-32 border-t border-carbon-border/30">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="scroll-reveal mb-16">
+      <p class="font-mono text-[10px] tracking-[0.4em] text-volt uppercase mb-3">Mechanical / Aerodynamic</p>
+      <h2 class="text-3xl sm:text-4xl font-bold tracking-tight">Data Matrix</h2>
+    </div>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-px bg-carbon-border/30">
+      <div class="scroll-reveal bg-carbon p-6 sm:p-8 group">
+        <p class="font-mono text-[10px] tracking-[0.3em] text-carbon-muted uppercase mb-4">Powertrain</p>
+        <p class="text-3xl sm:text-4xl font-bold text-white mb-1 font-mono">2,400<span class="text-volt text-lg ml-1">hp</span></p>
+        <p class="text-sm text-carbon-text leading-relaxed">Quad axial-flux motors. Each unit generates 600 hp independently with sub-5ms torque response.</p>
+      </div>
+      <div class="scroll-reveal bg-carbon p-6 sm:p-8 group">
+        <p class="font-mono text-[10px] tracking-[0.3em] text-carbon-muted uppercase mb-4">Peak Torque</p>
+        <p class="text-3xl sm:text-4xl font-bold text-white mb-1 font-mono">2,800<span class="text-volt text-lg ml-1">Nm</span></p>
+        <p class="text-sm text-carbon-text leading-relaxed">Available from zero RPM. Full torque vectoring across all four corners via independent inverters.</p>
+      </div>
+      <div class="scroll-reveal bg-carbon p-6 sm:p-8 group">
+        <p class="font-mono text-[10px] tracking-[0.3em] text-carbon-muted uppercase mb-4">Acceleration</p>
+        <p class="text-3xl sm:text-4xl font-bold text-white mb-1 font-mono">1.72<span class="text-volt text-lg ml-1">s</span></p>
+        <p class="text-sm text-carbon-text leading-relaxed">0–100 km/h with launch control. Active aero suspension drops 40mm for maximum mechanical grip.</p>
+      </div>
+      <div class="scroll-reveal bg-carbon p-6 sm:p-8 group">
+        <p class="font-mono text-[10px] tracking-[0.3em] text-carbon-muted uppercase mb-4">Top Speed</p>
+        <p class="text-3xl sm:text-4xl font-bold text-white mb-1 font-mono">412<span class="text-volt text-lg ml-1">km/h</span></p>
+        <p class="text-sm text-carbon-text leading-relaxed">Electronically governed. Active rear wing deploys at 280 km/h generating 820 kg downforce.</p>
+      </div>
+      <div class="scroll-reveal bg-carbon p-6 sm:p-8 group">
+        <p class="font-mono text-[10px] tracking-[0.3em] text-carbon-muted uppercase mb-4">Drag Coefficient</p>
+        <p class="text-3xl sm:text-4xl font-bold text-white mb-1 font-mono">0.198<span class="text-volt text-lg ml-1">Cd</span></p>
+        <p class="text-sm text-carbon-text leading-relaxed">Active underbody diffuser and morphing front intake. Lowest Cd in production-intent hypercar class.</p>
+      </div>
+      <div class="scroll-reveal bg-carbon p-6 sm:p-8 group">
+        <p class="font-mono text-[10px] tracking-[0.3em] text-carbon-muted uppercase mb-4">Downforce @ 300</p>
+        <p class="text-3xl sm:text-4xl font-bold text-white mb-1 font-mono">1,400<span class="text-volt text-lg ml-1">kg</span></p>
+        <p class="text-sm text-carbon-text leading-relaxed">Full aero mode: active wing, underbody ground effect, and front splitter generate race-car-level grip.</p>
+      </div>
+      <div class="scroll-reveal bg-carbon p-6 sm:p-8 group">
+        <p class="font-mono text-[10px] tracking-[0.3em] text-carbon-muted uppercase mb-4">Battery System</p>
+        <p class="text-3xl sm:text-4xl font-bold text-white mb-1 font-mono">120<span class="text-volt text-lg ml-1">kWh</span></p>
+        <p class="text-sm text-carbon-text leading-relaxed">Silicon-anode solid-state cells. 900V architecture enabling 350 kW DC fast charging.</p>
+      </div>
+      <div class="scroll-reveal bg-carbon p-6 sm:p-8 group">
+        <p class="font-mono text-[10px] tracking-[0.3em] text-carbon-muted uppercase mb-4">Charge Rate</p>
+        <p class="text-3xl sm:text-4xl font-bold text-white mb-1 font-mono">350<span class="text-volt text-lg ml-1">kW</span></p>
+        <p class="text-sm text-carbon-text leading-relaxed">10–80% in 12 minutes. 800V/900V dual-voltage architecture with active thermal pre-conditioning.</p>
+      </div>
+      <div class="scroll-reveal bg-carbon p-6 sm:p-8 group">
+        <p class="font-mono text-[10px] tracking-[0.3em] text-carbon-muted uppercase mb-4">Curb Weight</p>
+        <p class="text-3xl sm:text-4xl font-bold text-white mb-1 font-mono">1,680<span class="text-volt text-lg ml-1">kg</span></p>
+        <p class="text-sm text-carbon-text leading-relaxed">Full carbon-fiber monocoque with integrated battery structural floor. 52/48 weight distribution.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="configure" class="relative py-24 sm:py-32 border-t border-carbon-border/30">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="scroll-reveal mb-16">
+      <p class="font-mono text-[10px] tracking-[0.4em] text-volt uppercase mb-3">Interactive</p>
+      <h2 class="text-3xl sm:text-4xl font-bold tracking-tight">Configure Your X1</h2>
+    </div>
+    <div class="grid lg:grid-cols-5 gap-8">
+      <div class="lg:col-span-3 space-y-10">
+        <div class="scroll-reveal">
+          <p class="font-mono text-[10px] tracking-[0.3em] text-carbon-muted uppercase mb-4">Exterior Finish</p>
+          <div class="flex flex-wrap gap-3" role="radiogroup" aria-label="Exterior color selection">
+            <button class="config-option active w-12 h-12 rounded-none border-2 border-carbon-border relative" style="background: #0A0A0A;" data-color="obsidian" data-label="Obsidian Black" aria-label="Obsidian Black" role="radio" aria-checked="true" tabindex="0">
+              <span class="absolute -top-1 -right-1 w-3 h-3 bg-volt rounded-full opacity-100 transition-opacity duration-200"></span>
+            </button>
+            <button class="config-option w-12 h-12 rounded-none border-2 border-carbon-border relative" style="background: #1a1a2e;" data-color="quantum" data-label="Quantum Navy" aria-label="Quantum Navy" role="radio" aria-checked="false" tabindex="0">
+              <span class="absolute -top-1 -right-1 w-3 h-3 bg-volt rounded-full opacity-0 transition-opacity duration-200"></span>
+            </button>
+            <button class="config-option w-12 h-12 rounded-none border-2 border-carbon-border relative" style="background: #2d1b1b;" data-color="supernova" data-label="Supernova Burgundy" aria-label="Supernova Burgundy" role="radio" aria-checked="false" tabindex="0">
+              <span class="absolute -top-1 -right-1 w-3 h-3 bg-volt rounded-full opacity-0 transition-opacity duration-200"></span>
+            </button>
+            <button class="config-option w-12 h-12 rounded-none border-2 border-carbon-border relative" style="background: #C8FF00;" data-color="volt" data-label="Volt Yellow" aria-label="Volt Yellow" role="radio" aria-checked="false" tabindex="0">
+              <span class="absolute -top-1 -right-1 w-3 h-3 bg-volt rounded-full opacity-0 transition-opacity duration-200"></span>
+            </button>
+            <button class="config-option w-12 h-12 rounded-none border-2 border-carbon-border relative" style="background: linear-gradient(135deg, #0A0A0A 0%, #C8FF00 50%, #0A0A0A 100%);" data-color="flux" data-label="Flux Gradient" aria-label="Flux Gradient" role="radio" aria-checked="false" tabindex="0">
+              <span class="absolute -top-1 -right-1 w-3 h-3 bg-volt rounded-full opacity-0 transition-opacity duration-200"></span>
+            </button>
+          </div>
+          <p id="color-label" class="mt-3 text-sm text-carbon-text font-mono">Obsidian Black</p>
+        </div>
+        <div class="scroll-reveal">
+          <p class="font-mono text-[10px] tracking-[0.3em] text-carbon-muted uppercase mb-4">Wheel System</p>
+          <div class="grid grid-cols-2 gap-3" role="radiogroup" aria-label="Wheel selection">
+            <button class="config-option active border border-carbon-border p-4 text-left rounded-none" data-wheel="aero" data-price="0" role="radio" aria-checked="true" tabindex="0">
+              <p class="text-sm font-semibold text-white">Aero Blade</p>
+              <p class="text-xs text-carbon-muted font-mono mt-1">21" forged magnesium</p>
+            </button>
+            <button class="config-option border border-carbon-border p-4 text-left rounded-none" data-wheel="track" data-price="12000" role="radio" aria-checked="false" tabindex="0">
+              <p class="text-sm font-semibold text-white">Track Carbon</p>
+              <p class="text-xs text-carbon-muted font-mono mt-1">20" carbon fiber +12,000</p>
+            </button>
+          </div>
+        </div>
+        <div class="scroll-reveal">
+          <p class="font-mono text-[10px] tracking-[0.3em] text-carbon-muted uppercase mb-4">Interior Package</p>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3" role="radiogroup" aria-label="Interior package selection">
+            <button class="config-option active border border-carbon-border p-4 text-left rounded-none" data-interior="base" data-price="0" role="radio" aria-checked="true" tabindex="0">
+              <p class="text-sm font-semibold text-white">Essential</p>
+              <p class="text-xs text-carbon-muted font-mono mt-1">Alcantara + carbon</p>
+            </button>
+            <button class="config-option border border-carbon-border p-4 text-left rounded-none" data-interior="performance" data-price="24000" role="radio" aria-checked="false" tabindex="0">
+              <p class="text-sm font-semibold text-white">Performance</p>
+              <p class="text-xs text-carbon-muted font-mono mt-1">Full leather + race seats +24,000</p>
+            </button>
+            <button class="config-option border border-carbon-border p-4 text-left rounded-none" data-interior="luxury" data-price="48000" role="radio" aria-checked="false" tabindex="0">
+              <p class="text-sm font-semibold text-white">Luxury</p>
+              <p class="text-xs text-carbon-muted font-mono mt-1">Hand-stitched + gold accent +48,000</p>
+            </button>
+          </div>
+        </div>
+        <div class="scroll-reveal">
+          <p class="font-mono text-[10px] tracking-[0.3em] text-carbon-muted uppercase mb-4">Range Extender</p>
+          <div class="flex items-center gap-4">
+            <button id="range-toggle" class="relative w-12 h-6 bg-carbon-light border border-carbon-border rounded-none transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-volt" role="switch" aria-checked="false" aria-label="Range extender toggle" tabindex="0">
+              <span class="absolute top-0.5 left-0.5 w-5 h-5 bg-carbon-muted transition-all duration-200 rounded-none" id="range-toggle-knob"></span>
+            </button>
+            <div>
+              <p class="text-sm font-semibold text-white">Solid-State 150 kWh Pack</p>
+              <p class="text-xs text-carbon-muted font-mono">+30 kWh capacity &middot; +180 km range &middot; +38,000</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="lg:col-span-2">
+        <div class="scroll-reveal sticky top-24 border border-carbon-border p-6 sm:p-8 rounded-none" style="background: linear-gradient(180deg, #141414 0%, #0A0A0A 100%);">
+          <p class="font-mono text-[10px] tracking-[0.3em] text-carbon-muted uppercase mb-6">Configuration Summary</p>
+          <div class="space-y-4 mb-8">
+            <div class="flex justify-between items-center py-2 border-b border-carbon-border/30">
+              <span class="text-sm text-carbon-text">Base Vehicle</span>
+              <span class="text-sm font-mono text-white">2,400,000</span>
+            </div>
+            <div class="flex justify-between items-center py-2 border-b border-carbon-border/30">
+              <span class="text-sm text-carbon-text">Exterior</span>
+              <span class="text-sm font-mono text-white" id="summary-exterior">Obsidian Black</span>
+            </div>
+            <div class="flex justify-between items-center py-2 border-b border-carbon-border/30">
+              <span class="text-sm text-carbon-text">Wheels</span>
+              <span class="text-sm font-mono text-white" id="summary-wheels">Aero Blade</span>
+            </div>
+            <div class="flex justify-between items-center py-2 border-b border-carbon-border/30">
+              <span class="text-sm text-carbon-text">Interior</span>
+              <span class="text-sm font-mono text-white" id="summary-interior">Essential</span>
+            </div>
+            <div class="flex justify-between items-center py-2 border-b border-carbon-border/30">
+              <span class="text-sm text-carbon-text">Range Extender</span>
+              <span class="text-sm font-mono text-white" id="summary-range">No</span>
+            </div>
+          </div>
+          <div class="flex justify-between items-center pt-4 border-t border-carbon-border">
+            <span class="text-sm font-semibold text-white">Estimated Total</span>
+            <span class="text-2xl font-bold font-mono text-volt" id="summary-total">2,400,000</span>
+          </div>
+          <p class="text-[10px] text-carbon-muted font-mono mt-1">EUR &middot; Excl. local taxes</p>
+          <button id="reserve-btn" class="w-full mt-6 py-3 bg-volt text-carbon font-semibold text-sm tracking-wide rounded-none hover:bg-volt-dim transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-volt focus-visible:ring-offset-2 focus-visible:ring-offset-carbon">
+            Reserve Configuration
+          </button>
+          <div id="reserve-feedback" class="hidden mt-3 text-center text-sm text-volt font-mono" role="status" aria-live="polite"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="specifications" class="relative py-24 sm:py-32 border-t border-carbon-border/30">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="scroll-reveal mb-16">
+      <p class="font-mono text-[10px] tracking-[0.4em] text-volt uppercase mb-3">Engineering</p>
+      <h2 class="text-3xl sm:text-4xl font-bold tracking-tight">Structural Specifications</h2>
+    </div>
+    <div class="scroll-reveal border border-carbon-border/50">
+      <div class="grid grid-cols-[1fr_1px_1fr] sm:grid-cols-[1fr_1px_1fr_1px_1fr]">
+        <div class="p-4 sm:p-6 bg-carbon-mid/50">
+          <p class="font-mono text-[10px] tracking-[0.3em] text-carbon-muted uppercase">Category</p>
+        </div>
+        <div class="bg-carbon-border/30 hidden sm:block"></div>
+        <div class="p-4 sm:p-6 bg-carbon-mid/50">
+          <p class="font-mono text-[10px] tracking-[0.3em] text-carbon-muted uppercase">Specification</p>
+        </div>
+        <div class="bg-carbon-border/30 hidden sm:block"></div>
+        <div class="p-4 sm:p-6 bg-carbon-mid/50">
+          <p class="font-mono text-[10px] tracking-[0.3em] text-carbon-muted uppercase">Detail</p>
+        </div>
+      </div>
+      <div class="spec-row grid grid-cols-[1fr_1px_1fr] sm:grid-cols-[1fr_1px_1fr_1px_1fr] border-t border-carbon-border/20">
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text">Chassis</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-white font-medium">Construction</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text font-mono">Carbon-fiber monocoque</p></div>
+      </div>
+      <div class="spec-row grid grid-cols-[1fr_1px_1fr] sm:grid-cols-[1fr_1px_1fr_1px_1fr] border-t border-carbon-border/20">
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text">Chassis</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-white font-medium">Weight Distribution</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text font-mono">52 / 48 (F/R)</p></div>
+      </div>
+      <div class="spec-row grid grid-cols-[1fr_1px_1fr] sm:grid-cols-[1fr_1px_1fr_1px_1fr] border-t border-carbon-border/20">
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text">Suspension</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-white font-medium">Front</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text font-mono">Double wishbone, pushrod</p></div>
+      </div>
+      <div class="spec-row grid grid-cols-[1fr_1px_1fr] sm:grid-cols-[1fr_1px_1fr_1px_1fr] border-t border-carbon-border/20">
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text">Suspension</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-white font-medium">Rear</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text font-mono">Multi-link, active anti-roll</p></div>
+      </div>
+      <div class="spec-row grid grid-cols-[1fr_1px_1fr] sm:grid-cols-[1fr_1px_1fr_1px_1fr] border-t border-carbon-border/20">
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text">Brakes</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-white font-medium">System</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text font-mono">Carbon-ceramic, 420mm F / 390mm R</p></div>
+      </div>
+      <div class="spec-row grid grid-cols-[1fr_1px_1fr] sm:grid-cols-[1fr_1px_1fr_1px_1fr] border-t border-carbon-border/20">
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text">Brakes</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-white font-medium">Regeneration</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text font-mono">Adjustable, max 0.4g recoup</p></div>
+      </div>
+      <div class="spec-row grid grid-cols-[1fr_1px_1fr] sm:grid-cols-[1fr_1px_1fr_1px_1fr] border-t border-carbon-border/20">
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text">Aerodynamics</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-white font-medium">Active Elements</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text font-mono">Rear wing, front splitter, underbody diffuser</p></div>
+      </div>
+      <div class="spec-row grid grid-cols-[1fr_1px_1fr] sm:grid-cols-[1fr_1px_1fr_1px_1fr] border-t border-carbon-border/20">
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text">Aerodynamics</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-white font-medium">Drag Coefficient</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text font-mono">0.198 Cd (low-drag mode)</p></div>
+      </div>
+      <div class="spec-row grid grid-cols-[1fr_1px_1fr] sm:grid-cols-[1fr_1px_1fr_1px_1fr] border-t border-carbon-border/20">
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text">Dimensions</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-white font-medium">Length &times; Width &times; Height</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text font-mono">4,680 &times; 2,080 &times; 1,140 mm</p></div>
+      </div>
+      <div class="spec-row grid grid-cols-[1fr_1px_1fr] sm:grid-cols-[1fr_1px_1fr_1px_1fr] border-t border-carbon-border/20">
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text">Dimensions</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-white font-medium">Wheelbase</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text font-mono">2,730 mm</p></div>
+      </div>
+      <div class="spec-row grid grid-cols-[1fr_1px_1fr] sm:grid-cols-[1fr_1px_1fr_1px_1fr] border-t border-carbon-border/20">
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text">Tires</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-white font-medium">Standard Fitment</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text font-mono">Michelin Pilot Sport EV, 265/35 ZR21 F / 325/30 ZR21 R</p></div>
+      </div>
+      <div class="spec-row grid grid-cols-[1fr_1px_1fr] sm:grid-cols-[1fr_1px_1fr_1px_1fr] border-t border-carbon-border/20">
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text">Electrical</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-white font-medium">Architecture</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text font-mono">900V DC, SiC inverter</p></div>
+      </div>
+      <div class="spec-row grid grid-cols-[1fr_1px_1fr] sm:grid-cols-[1fr_1px_1fr_1px_1fr] border-t border-carbon-border/20">
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text">Electrical</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-white font-medium">Charging</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text font-mono">CCS2, 350 kW DC / 22 kW AC</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="border-t border-carbon-border/30 py-12">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="flex flex-col sm:flex-row justify-between items-center gap-6">
+      <div class="flex items-center gap-3">
+        <svg width="20" height="20" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+          <path d="M14 2L2 26h10l2-8 2 8h10L14 2z" fill="#C8FF00" opacity="0.6"/>
+        </svg>
+        <span class="text-xs font-mono text-carbon-muted tracking-wider">VOLTAIC &copy; 2026</span>
+      </div>
+      <div class="flex gap-6">
+        <a href="#" class="text-xs font-mono text-carbon-muted hover:text-white transition-colors duration-200">Privacy</a>
+        <a href="#" class="text-xs font-mono text-carbon-muted hover:text-white transition-colors duration-200">Terms</a>
+        <a href="#" class="text-xs font-mono text-carbon-muted hover:text-white transition-colors duration-200">Contact</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function() {
+  const base = 2400000;
+  let wheelPrice = 0;
+  let interiorPrice = 0;
+  let rangePrice = 0;
+  let rangeActive = false;
+
+  function formatPrice(n) {
+    return n.toLocaleString('en-US');
+  }
+
+  function updateTotal() {
+    const total = base + wheelPrice + interiorPrice + rangePrice;
+    document.getElementById('summary-total').textContent = formatPrice(total);
+  }
+
+  function clearGroupActive(container, selector) {
+    container.querySelectorAll(selector).forEach(function(btn) {
+      btn.classList.remove('active');
+      btn.setAttribute('aria-checked', 'false');
+      var dot = btn.querySelector('span');
+      if (dot) dot.style.opacity = '0';
+    });
+  }
+
+  document.querySelectorAll('[data-color]').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var parent = btn.parentElement;
+      clearGroupActive(parent, '[data-color]');
+      btn.classList.add('active');
+      btn.setAttribute('aria-checked', 'true');
+      var dot = btn.querySelector('span');
+      if (dot) dot.style.opacity = '1';
+      document.getElementById('color-label').textContent = btn.dataset.label;
+      document.getElementById('summary-exterior').textContent = btn.dataset.label;
+    });
+  });
+
+  document.querySelectorAll('[data-wheel]').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var parent = btn.parentElement;
+      clearGroupActive(parent, '[data-wheel]');
+      btn.classList.add('active');
+      btn.setAttribute('aria-checked', 'true');
+      wheelPrice = parseInt(btn.dataset.price, 10) || 0;
+      document.getElementById('summary-wheels').textContent = btn.querySelector('p').textContent;
+      updateTotal();
+    });
+  });
+
+  document.querySelectorAll('[data-interior]').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var parent = btn.parentElement;
+      clearGroupActive(parent, '[data-interior]');
+      btn.classList.add('active');
+      btn.setAttribute('aria-checked', 'true');
+      interiorPrice = parseInt(btn.dataset.price, 10) || 0;
+      document.getElementById('summary-interior').textContent = btn.querySelector('p').textContent;
+      updateTotal();
+    });
+  });
+
+  var rangeToggle = document.getElementById('range-toggle');
+  var rangeKnob = document.getElementById('range-toggle-knob');
+  rangeToggle.addEventListener('click', function() {
+    rangeActive = !rangeActive;
+    rangeToggle.setAttribute('aria-checked', rangeActive ? 'true' : 'false');
+    if (rangeActive) {
+      rangeToggle.style.backgroundColor = '#C8FF00';
+      rangeToggle.style.borderColor = '#C8FF00';
+      rangeKnob.style.transform = 'translateX(24px)';
+      rangeKnob.style.backgroundColor = '#0A0A0A';
+      rangePrice = 38000;
+      document.getElementById('summary-range').textContent = 'Yes (+150 kWh)';
+    } else {
+      rangeToggle.style.backgroundColor = '#1E1E1E';
+      rangeToggle.style.borderColor = '#2A2A2A';
+      rangeKnob.style.transform = 'translateX(0)';
+      rangeKnob.style.backgroundColor = '#5A5A5A';
+      rangePrice = 0;
+      document.getElementById('summary-range').textContent = 'No';
+    }
+    updateTotal();
+  });
+
+  var reserveBtn = document.getElementById('reserve-btn');
+  var reserveFeedback = document.getElementById('reserve-feedback');
+  reserveBtn.addEventListener('click', function() {
+    reserveBtn.disabled = true;
+    reserveBtn.textContent = 'Processing...';
+    reserveBtn.style.opacity = '0.7';
+    setTimeout(function() {
+      reserveBtn.textContent = 'Reserved';
+      reserveBtn.style.opacity = '1';
+      reserveFeedback.textContent = 'Configuration saved. Reference: VLX1-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+      reserveFeedback.classList.remove('hidden');
+      setTimeout(function() {
+        reserveBtn.disabled = false;
+        reserveBtn.textContent = 'Reserve Configuration';
+      }, 3000);
+    }, 1200);
+  });
+
+  var mobileMenuBtn = document.getElementById('mobile-menu-btn');
+  var mobileMenu = document.getElementById('mobile-menu');
+  mobileMenuBtn.addEventListener('click', function() {
+    var expanded = mobileMenuBtn.getAttribute('aria-expanded') === 'true';
+    mobileMenuBtn.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+    mobileMenu.classList.toggle('hidden');
+  });
+
+  mobileMenu.querySelectorAll('a').forEach(function(link) {
+    link.addEventListener('click', function() {
+      mobileMenu.classList.add('hidden');
+      mobileMenuBtn.setAttribute('aria-expanded', 'false');
+    });
+  });
+
+  var revealElements = document.querySelectorAll('.scroll-reveal');
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+  revealElements.forEach(function(el) { observer.observe(el); });
+
+  var style = document.createElement('style');
+  style.textContent = '.config-option:focus-visible { outline: 2px solid #C8FF00; outline-offset: 2px; }';
+  document.head.appendChild(style);
+})();
+</script>
+</body>
+</html>
+ + total.toLocaleString('en-US');
+                }
+            }
+
+            function updateConfigLabel() {
+                const label = document.getElementById('config-trim-label');
+                if (label) {
+                    const activeTrim = document.querySelector('[data-group="trim"].active');
+                    if (activeTrim) {
+                        label.textContent = activeTrim.dataset.value.toUpperCase();
+                    }
+                }
+            }
+
+            function updateCarColor(colorValue) {
+                const body = document.getElementById('car-body');
+                const window_ = document.getElementById('car-window');
+                if (body) {
+                    body.setAttribute('fill', colorValue === '#111111' ? '#1a1a1a' : colorValue);
+                    if (colorValue !== '#111111') {
+                        body.setAttribute('stroke', colorValue);
+                        window_.setAttribute('fill', colorValue);
+                        window_.setAttribute('stroke', colorValue);
+                    } else {
+                        body.setAttribute('stroke', '#00e5ff');
+                        window_.setAttribute('fill', '#00e5ff');
+                        window_.setAttribute('stroke', '#00e5ff');
+                    }
+                }
+            }
+
+            document.querySelectorAll('.config-option').forEach(function(option) {
+                option.addEventListener('click', function() {
+                    const group = this.dataset.group;
+                    const price = parseInt(this.dataset.price, 10);
+
+                    document.querySelectorAll('.config-option[data-group="' + group + '"]').forEach(function(opt) {
+                        opt.classList.remove('active');
+                        opt.setAttribute('aria-checked', 'false');
+                        if (group === 'color') {
+                            opt.classList.remove('border-plasma');
+                            opt.classList.add('border-steel/50');
+                        }
+                    });
+
+                    this.classList.add('active');
+                    this.setAttribute('aria-checked', 'true');
+                    if (group === 'color') {
+                        this.classList.remove('border-steel/50');
+                        this.classList.add('border-plasma');
+                    }
+
+                    configState[group] = price;
+                    updatePrice();
+
+                    if (group === 'trim') {
+                        updateConfigLabel();
+                    }
+                    if (group === 'color') {
+                        updateCarColor(this.dataset.color);
+                    }
+                });
+            });
+
+            function showToast(message) {
+                const container = document.getElementById('toast-container');
+                if (!container) return;
+                const toast = document.createElement('div');
+                toast.className = 'bg-titanium border border-steel/50 text-white text-sm font-display px-6 py-4 rounded shadow-lg transform translate-y-2 opacity-0 transition-all duration-300';
+                toast.textContent = message;
+                toast.setAttribute('role', 'status');
+                container.appendChild(toast);
+                requestAnimationFrame(function() {
+                    toast.classList.remove('translate-y-2', 'opacity-0');
+                });
+                setTimeout(function() {
+                    toast.classList.add('translate-y-2', 'opacity-0');
+                    setTimeout(function() { toast.remove(); }, 300);
+                }, 4000);
+            }
+
+            const reserveBtn = document.getElementById('reserve-btn');
+            if (reserveBtn) {
+                reserveBtn.addEventListener('click', function() {
+                    const total = BASE_PRICE + configState.trim + configState.color + configState.wheels;
+                    showToast('Reservation confirmed — <!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VOLTAIC X1 — Electric Hypercar Concept</title>
+<meta name="description" content="VOLTAIC X1: 2,400 hp quad-motor electric hypercar concept. 0-100 km/h in 1.72s. 412 km/h top speed.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        volt: '#C8FF00',
+        'volt-dim': '#8AAD00',
+        carbon: '#0A0A0A',
+        'carbon-mid': '#141414',
+        'carbon-light': '#1E1E1E',
+        'carbon-border': '#2A2A2A',
+        'carbon-text': '#A0A0A0',
+        'carbon-muted': '#5A5A5A',
+      },
+      fontFamily: {
+        display: ['"Space Grotesk"', 'sans-serif'],
+        mono: ['"JetBrains Mono"', 'monospace'],
+      },
+    }
+  }
+}
+</script>
+<style>
+  @keyframes hero-glow {
+    0%, 100% { opacity: 0.3; transform: scale(1); }
+    50% { opacity: 0.6; transform: scale(1.05); }
+  }
+  @keyframes dash-flow {
+    to { stroke-dashoffset: -20; }
+  }
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes pulse-ring {
+    0% { transform: scale(1); opacity: 0.6; }
+    100% { transform: scale(1.8); opacity: 0; }
+  }
+  @keyframes counter-tick {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+  .animate-hero-glow { animation: hero-glow 4s ease-in-out infinite; }
+  .animate-dash-flow { animation: dash-flow 1s linear infinite; }
+  .animate-fade-up { animation: fade-up 0.8s ease-out forwards; opacity: 0; }
+  .animate-fade-up-d1 { animation-delay: 0.1s; }
+  .animate-fade-up-d2 { animation-delay: 0.2s; }
+  .animate-fade-up-d3 { animation-delay: 0.3s; }
+  .animate-fade-up-d4 { animation-delay: 0.4s; }
+  .animate-fade-up-d5 { animation-delay: 0.5s; }
+  .animate-fade-up-d6 { animation-delay: 0.6s; }
+  .animate-fade-up-d7 { animation-delay: 0.7s; }
+  .pulse-ring { animation: pulse-ring 1.5s ease-out infinite; }
+  .counter-tick { animation: counter-tick 2s ease-in-out infinite; }
+  .scroll-reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease-out, transform 0.6s ease-out; }
+  .scroll-reveal.visible { opacity: 1; transform: translateY(0); }
+  .config-option { transition: all 0.2s ease-out; }
+  .config-option:hover { transform: translateY(-2px); }
+  .config-option.active { border-color: #C8FF00 !important; box-shadow: 0 0 20px rgba(200, 255, 0, 0.15); }
+  .spec-row { transition: background-color 0.2s ease; }
+  .spec-row:hover { background-color: rgba(200, 255, 0, 0.03); }
+  .nav-link { position: relative; }
+  .nav-link::after { content: ''; position: absolute; bottom: -2px; left: 0; width: 0; height: 1px; background: #C8FF00; transition: width 0.3s ease; }
+  .nav-link:hover::after { width: 100%; }
+  .hero-stat-value { font-variant-numeric: tabular-nums; }
+  .grid-line { stroke: #2A2A2A; stroke-width: 0.5; }
+  @media (prefers-reduced-motion: reduce) {
+    .animate-hero-glow, .animate-dash-flow, .pulse-ring, .counter-tick { animation: none; }
+    .scroll-reveal { opacity: 1; transform: none; transition: none; }
+    .animate-fade-up { animation: none; opacity: 1; }
+    .config-option:hover { transform: none; }
+  }
+  ::selection { background: rgba(200, 255, 0, 0.3); color: #fff; }
+  :focus-visible { outline: 2px solid #C8FF00; outline-offset: 2px; }
+  body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+</style>
+</head>
+<body class="bg-carbon text-white font-display antialiased">
+
+<a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-volt focus:text-carbon focus:font-semibold focus:rounded">Skip to main content</a>
+
+<header class="fixed top-0 left-0 right-0 z-40 border-b border-carbon-border/50" style="background: rgba(10,10,10,0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);">
+  <nav class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between" aria-label="Primary navigation">
+    <a href="#" class="flex items-center gap-3 group" aria-label="VOLTAIC home">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+        <path d="M14 2L2 26h10l2-8 2 8h10L14 2z" fill="#C8FF00" opacity="0.9"/>
+        <path d="M14 10l-5 12h3l2-6 2 6h3L14 10z" fill="#0A0A0A"/>
+      </svg>
+      <span class="text-sm font-semibold tracking-[0.3em] text-white group-hover:text-volt transition-colors duration-200">VOLTAIC</span>
+    </a>
+    <div class="hidden md:flex items-center gap-8">
+      <a href="#hero" class="nav-link text-xs font-medium tracking-[0.2em] text-carbon-text hover:text-white transition-colors duration-200">X1</a>
+      <a href="#performance" class="nav-link text-xs font-medium tracking-[0.2em] text-carbon-text hover:text-white transition-colors duration-200">PERFORMANCE</a>
+      <a href="#configure" class="nav-link text-xs font-medium tracking-[0.2em] text-carbon-text hover:text-white transition-colors duration-200">CONFIGURE</a>
+      <a href="#specifications" class="nav-link text-xs font-medium tracking-[0.2em] text-carbon-text hover:text-white transition-colors duration-200">SPECS</a>
+    </div>
+    <button id="mobile-menu-btn" class="md:hidden p-2 text-carbon-text hover:text-white transition-colors" aria-label="Toggle menu" aria-expanded="false">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+  </nav>
+  <div id="mobile-menu" class="md:hidden hidden border-t border-carbon-border/50 px-6 py-4 space-y-3" style="background: rgba(10,10,10,0.95);">
+    <a href="#hero" class="block text-xs font-medium tracking-[0.2em] text-carbon-text hover:text-volt py-2">X1</a>
+    <a href="#performance" class="block text-xs font-medium tracking-[0.2em] text-carbon-text hover:text-volt py-2">PERFORMANCE</a>
+    <a href="#configure" class="block text-xs font-medium tracking-[0.2em] text-carbon-text hover:text-volt py-2">CONFIGURE</a>
+    <a href="#specifications" class="block text-xs font-medium tracking-[0.2em] text-carbon-text hover:text-volt py-2">SPECS</a>
+  </div>
+</header>
+
+<main id="main">
+
+<section id="hero" class="relative min-h-screen flex items-center overflow-hidden pt-16">
+  <div class="absolute inset-0 pointer-events-none" aria-hidden="true">
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full animate-hero-glow" style="background: radial-gradient(circle, rgba(200,255,0,0.08) 0%, transparent 70%);"></div>
+    <svg class="absolute inset-0 w-full h-full opacity-[0.04]" aria-hidden="true"><defs><pattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse"><path d="M 60 0 L 0 0 0 60" fill="none" class="grid-line"/></pattern></defs><rect width="100%" height="100%" fill="url(#grid)"/></svg>
+    <div class="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-carbon-border to-transparent"></div>
+  </div>
+  <div class="relative max-w-7xl mx-auto px-6 py-20 w-full">
+    <div class="grid lg:grid-cols-2 gap-16 items-center">
+      <div class="space-y-8">
+        <div class="animate-fade-up">
+          <p class="font-mono text-[10px] tracking-[0.4em] text-volt uppercase mb-4">Concept Prototype 2026</p>
+          <h1 class="text-6xl sm:text-7xl lg:text-8xl font-bold tracking-tight leading-[0.9]">
+            <span class="block text-white">VOLTAIC</span>
+            <span class="block text-volt">X1</span>
+          </h1>
+        </div>
+        <p class="animate-fade-up animate-fade-up-d2 text-carbon-text text-base sm:text-lg leading-relaxed max-w-md font-light">
+          Quad-motor electric hypercar. 2,400 hp directed through four independent axial-flux power units. No transmission. No latency. Pure force, vectorized.
+        </p>
+        <div class="animate-fade-up animate-fade-up-d3 flex flex-wrap gap-4">
+          <a href="#configure" class="inline-flex items-center gap-2 px-6 py-3 bg-volt text-carbon font-semibold text-sm tracking-wide rounded-none hover:bg-volt-dim transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-volt focus-visible:ring-offset-2 focus-visible:ring-offset-carbon">
+            Configure Yours
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+          </a>
+          <a href="#performance" class="inline-flex items-center gap-2 px-6 py-3 border border-carbon-border text-white font-medium text-sm tracking-wide rounded-none hover:border-carbon-text transition-colors duration-200">
+            Explore Data
+          </a>
+        </div>
+      </div>
+      <div class="relative flex items-center justify-center" aria-hidden="true">
+        <svg viewBox="0 0 500 280" class="w-full max-w-lg" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M60 200 Q80 120 140 110 L200 105 Q240 100 260 90 L300 75 Q340 60 380 65 Q420 70 440 90 L450 100" stroke="#C8FF00" stroke-width="1.5" opacity="0.6"/>
+          <path d="M60 200 Q80 130 140 115 L200 110 Q250 105 280 95 L320 80 Q360 65 400 70 L440 85 L450 95" stroke="#C8FF00" stroke-width="0.8" opacity="0.3"/>
+          <path d="M80 210 Q100 140 160 130 L220 125 Q270 120 300 110 L350 95 Q390 80 430 85 L455 100 L460 110 L450 120" stroke="#2A2A2A" stroke-width="1" fill="none"/>
+          <path d="M100 215 Q120 150 180 140 L240 135 Q290 130 320 120 L370 105 Q410 90 445 95 L460 110 L455 125 L440 135 Q400 150 360 155 L300 165 Q240 175 200 180 L140 190 Q100 200 80 215 Z" fill="#141414" stroke="#2A2A2A" stroke-width="0.5"/>
+          <ellipse cx="130" cy="195" rx="28" ry="28" fill="#0A0A0A" stroke="#2A2A2A" stroke-width="1"/>
+          <ellipse cx="130" cy="195" rx="18" ry="18" fill="#141414" stroke="#3A3A3A" stroke-width="0.5"/>
+          <ellipse cx="130" cy="195" rx="6" ry="6" fill="#2A2A2A"/>
+          <ellipse cx="390" cy="140" rx="28" ry="28" fill="#0A0A0A" stroke="#2A2A2A" stroke-width="1"/>
+          <ellipse cx="390" cy="140" rx="18" ry="18" fill="#141414" stroke="#3A3A3A" stroke-width="0.5"/>
+          <ellipse cx="390" cy="140" rx="6" ry="6" fill="#2A2A2A"/>
+          <line x1="200" y1="80" x2="200" y2="60" stroke="#C8FF00" stroke-width="0.5" opacity="0.4" stroke-dasharray="4 4" class="animate-dash-flow"/>
+          <line x1="300" y1="55" x2="300" y2="35" stroke="#C8FF00" stroke-width="0.5" opacity="0.4" stroke-dasharray="4 4" class="animate-dash-flow"/>
+          <circle cx="200" cy="58" r="2" fill="#C8FF00" opacity="0.6"/>
+          <circle cx="300" cy="33" r="2" fill="#C8FF00" opacity="0.6"/>
+          <text x="195" y="52" font-family="JetBrains Mono, monospace" font-size="7" fill="#C8FF00" opacity="0.5">FLUX</text>
+          <text x="295" y="27" font-family="JetBrains Mono, monospace" font-size="7" fill="#C8FF00" opacity="0.5">CORE</text>
+        </svg>
+      </div>
+    </div>
+    <div class="mt-16 pt-8 border-t border-carbon-border/50 grid grid-cols-2 md:grid-cols-4 gap-8">
+      <div class="animate-fade-up animate-fade-up-d4">
+        <p class="font-mono text-[10px] tracking-[0.3em] text-carbon-muted uppercase mb-2">0 – 100 km/h</p>
+        <p class="text-4xl sm:text-5xl font-bold text-white hero-stat-value">1.72<span class="text-volt text-2xl ml-1">s</span></p>
+      </div>
+      <div class="animate-fade-up animate-fade-up-d5">
+        <p class="font-mono text-[10px] tracking-[0.3em] text-carbon-muted uppercase mb-2">Peak Power</p>
+        <p class="text-4xl sm:text-5xl font-bold text-white hero-stat-value">2,400<span class="text-volt text-2xl ml-1">hp</span></p>
+      </div>
+      <div class="animate-fade-up animate-fade-up-d6">
+        <p class="font-mono text-[10px] tracking-[0.3em] text-carbon-muted uppercase mb-2">Top Speed</p>
+        <p class="text-4xl sm:text-5xl font-bold text-white hero-stat-value">412<span class="text-volt text-2xl ml-1">km/h</span></p>
+      </div>
+      <div class="animate-fade-up animate-fade-up-d7">
+        <p class="font-mono text-[10px] tracking-[0.3em] text-carbon-muted uppercase mb-2">Range</p>
+        <p class="text-4xl sm:text-5xl font-bold text-white hero-stat-value">580<span class="text-volt text-2xl ml-1">km</span></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="performance" class="relative py-24 sm:py-32 border-t border-carbon-border/30">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="scroll-reveal mb-16">
+      <p class="font-mono text-[10px] tracking-[0.4em] text-volt uppercase mb-3">Mechanical / Aerodynamic</p>
+      <h2 class="text-3xl sm:text-4xl font-bold tracking-tight">Data Matrix</h2>
+    </div>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-px bg-carbon-border/30">
+      <div class="scroll-reveal bg-carbon p-6 sm:p-8 group">
+        <p class="font-mono text-[10px] tracking-[0.3em] text-carbon-muted uppercase mb-4">Powertrain</p>
+        <p class="text-3xl sm:text-4xl font-bold text-white mb-1 font-mono">2,400<span class="text-volt text-lg ml-1">hp</span></p>
+        <p class="text-sm text-carbon-text leading-relaxed">Quad axial-flux motors. Each unit generates 600 hp independently with sub-5ms torque response.</p>
+      </div>
+      <div class="scroll-reveal bg-carbon p-6 sm:p-8 group">
+        <p class="font-mono text-[10px] tracking-[0.3em] text-carbon-muted uppercase mb-4">Peak Torque</p>
+        <p class="text-3xl sm:text-4xl font-bold text-white mb-1 font-mono">2,800<span class="text-volt text-lg ml-1">Nm</span></p>
+        <p class="text-sm text-carbon-text leading-relaxed">Available from zero RPM. Full torque vectoring across all four corners via independent inverters.</p>
+      </div>
+      <div class="scroll-reveal bg-carbon p-6 sm:p-8 group">
+        <p class="font-mono text-[10px] tracking-[0.3em] text-carbon-muted uppercase mb-4">Acceleration</p>
+        <p class="text-3xl sm:text-4xl font-bold text-white mb-1 font-mono">1.72<span class="text-volt text-lg ml-1">s</span></p>
+        <p class="text-sm text-carbon-text leading-relaxed">0–100 km/h with launch control. Active aero suspension drops 40mm for maximum mechanical grip.</p>
+      </div>
+      <div class="scroll-reveal bg-carbon p-6 sm:p-8 group">
+        <p class="font-mono text-[10px] tracking-[0.3em] text-carbon-muted uppercase mb-4">Top Speed</p>
+        <p class="text-3xl sm:text-4xl font-bold text-white mb-1 font-mono">412<span class="text-volt text-lg ml-1">km/h</span></p>
+        <p class="text-sm text-carbon-text leading-relaxed">Electronically governed. Active rear wing deploys at 280 km/h generating 820 kg downforce.</p>
+      </div>
+      <div class="scroll-reveal bg-carbon p-6 sm:p-8 group">
+        <p class="font-mono text-[10px] tracking-[0.3em] text-carbon-muted uppercase mb-4">Drag Coefficient</p>
+        <p class="text-3xl sm:text-4xl font-bold text-white mb-1 font-mono">0.198<span class="text-volt text-lg ml-1">Cd</span></p>
+        <p class="text-sm text-carbon-text leading-relaxed">Active underbody diffuser and morphing front intake. Lowest Cd in production-intent hypercar class.</p>
+      </div>
+      <div class="scroll-reveal bg-carbon p-6 sm:p-8 group">
+        <p class="font-mono text-[10px] tracking-[0.3em] text-carbon-muted uppercase mb-4">Downforce @ 300</p>
+        <p class="text-3xl sm:text-4xl font-bold text-white mb-1 font-mono">1,400<span class="text-volt text-lg ml-1">kg</span></p>
+        <p class="text-sm text-carbon-text leading-relaxed">Full aero mode: active wing, underbody ground effect, and front splitter generate race-car-level grip.</p>
+      </div>
+      <div class="scroll-reveal bg-carbon p-6 sm:p-8 group">
+        <p class="font-mono text-[10px] tracking-[0.3em] text-carbon-muted uppercase mb-4">Battery System</p>
+        <p class="text-3xl sm:text-4xl font-bold text-white mb-1 font-mono">120<span class="text-volt text-lg ml-1">kWh</span></p>
+        <p class="text-sm text-carbon-text leading-relaxed">Silicon-anode solid-state cells. 900V architecture enabling 350 kW DC fast charging.</p>
+      </div>
+      <div class="scroll-reveal bg-carbon p-6 sm:p-8 group">
+        <p class="font-mono text-[10px] tracking-[0.3em] text-carbon-muted uppercase mb-4">Charge Rate</p>
+        <p class="text-3xl sm:text-4xl font-bold text-white mb-1 font-mono">350<span class="text-volt text-lg ml-1">kW</span></p>
+        <p class="text-sm text-carbon-text leading-relaxed">10–80% in 12 minutes. 800V/900V dual-voltage architecture with active thermal pre-conditioning.</p>
+      </div>
+      <div class="scroll-reveal bg-carbon p-6 sm:p-8 group">
+        <p class="font-mono text-[10px] tracking-[0.3em] text-carbon-muted uppercase mb-4">Curb Weight</p>
+        <p class="text-3xl sm:text-4xl font-bold text-white mb-1 font-mono">1,680<span class="text-volt text-lg ml-1">kg</span></p>
+        <p class="text-sm text-carbon-text leading-relaxed">Full carbon-fiber monocoque with integrated battery structural floor. 52/48 weight distribution.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="configure" class="relative py-24 sm:py-32 border-t border-carbon-border/30">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="scroll-reveal mb-16">
+      <p class="font-mono text-[10px] tracking-[0.4em] text-volt uppercase mb-3">Interactive</p>
+      <h2 class="text-3xl sm:text-4xl font-bold tracking-tight">Configure Your X1</h2>
+    </div>
+    <div class="grid lg:grid-cols-5 gap-8">
+      <div class="lg:col-span-3 space-y-10">
+        <div class="scroll-reveal">
+          <p class="font-mono text-[10px] tracking-[0.3em] text-carbon-muted uppercase mb-4">Exterior Finish</p>
+          <div class="flex flex-wrap gap-3" role="radiogroup" aria-label="Exterior color selection">
+            <button class="config-option active w-12 h-12 rounded-none border-2 border-carbon-border relative" style="background: #0A0A0A;" data-color="obsidian" data-label="Obsidian Black" aria-label="Obsidian Black" role="radio" aria-checked="true" tabindex="0">
+              <span class="absolute -top-1 -right-1 w-3 h-3 bg-volt rounded-full opacity-100 transition-opacity duration-200"></span>
+            </button>
+            <button class="config-option w-12 h-12 rounded-none border-2 border-carbon-border relative" style="background: #1a1a2e;" data-color="quantum" data-label="Quantum Navy" aria-label="Quantum Navy" role="radio" aria-checked="false" tabindex="0">
+              <span class="absolute -top-1 -right-1 w-3 h-3 bg-volt rounded-full opacity-0 transition-opacity duration-200"></span>
+            </button>
+            <button class="config-option w-12 h-12 rounded-none border-2 border-carbon-border relative" style="background: #2d1b1b;" data-color="supernova" data-label="Supernova Burgundy" aria-label="Supernova Burgundy" role="radio" aria-checked="false" tabindex="0">
+              <span class="absolute -top-1 -right-1 w-3 h-3 bg-volt rounded-full opacity-0 transition-opacity duration-200"></span>
+            </button>
+            <button class="config-option w-12 h-12 rounded-none border-2 border-carbon-border relative" style="background: #C8FF00;" data-color="volt" data-label="Volt Yellow" aria-label="Volt Yellow" role="radio" aria-checked="false" tabindex="0">
+              <span class="absolute -top-1 -right-1 w-3 h-3 bg-volt rounded-full opacity-0 transition-opacity duration-200"></span>
+            </button>
+            <button class="config-option w-12 h-12 rounded-none border-2 border-carbon-border relative" style="background: linear-gradient(135deg, #0A0A0A 0%, #C8FF00 50%, #0A0A0A 100%);" data-color="flux" data-label="Flux Gradient" aria-label="Flux Gradient" role="radio" aria-checked="false" tabindex="0">
+              <span class="absolute -top-1 -right-1 w-3 h-3 bg-volt rounded-full opacity-0 transition-opacity duration-200"></span>
+            </button>
+          </div>
+          <p id="color-label" class="mt-3 text-sm text-carbon-text font-mono">Obsidian Black</p>
+        </div>
+        <div class="scroll-reveal">
+          <p class="font-mono text-[10px] tracking-[0.3em] text-carbon-muted uppercase mb-4">Wheel System</p>
+          <div class="grid grid-cols-2 gap-3" role="radiogroup" aria-label="Wheel selection">
+            <button class="config-option active border border-carbon-border p-4 text-left rounded-none" data-wheel="aero" data-price="0" role="radio" aria-checked="true" tabindex="0">
+              <p class="text-sm font-semibold text-white">Aero Blade</p>
+              <p class="text-xs text-carbon-muted font-mono mt-1">21" forged magnesium</p>
+            </button>
+            <button class="config-option border border-carbon-border p-4 text-left rounded-none" data-wheel="track" data-price="12000" role="radio" aria-checked="false" tabindex="0">
+              <p class="text-sm font-semibold text-white">Track Carbon</p>
+              <p class="text-xs text-carbon-muted font-mono mt-1">20" carbon fiber +12,000</p>
+            </button>
+          </div>
+        </div>
+        <div class="scroll-reveal">
+          <p class="font-mono text-[10px] tracking-[0.3em] text-carbon-muted uppercase mb-4">Interior Package</p>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3" role="radiogroup" aria-label="Interior package selection">
+            <button class="config-option active border border-carbon-border p-4 text-left rounded-none" data-interior="base" data-price="0" role="radio" aria-checked="true" tabindex="0">
+              <p class="text-sm font-semibold text-white">Essential</p>
+              <p class="text-xs text-carbon-muted font-mono mt-1">Alcantara + carbon</p>
+            </button>
+            <button class="config-option border border-carbon-border p-4 text-left rounded-none" data-interior="performance" data-price="24000" role="radio" aria-checked="false" tabindex="0">
+              <p class="text-sm font-semibold text-white">Performance</p>
+              <p class="text-xs text-carbon-muted font-mono mt-1">Full leather + race seats +24,000</p>
+            </button>
+            <button class="config-option border border-carbon-border p-4 text-left rounded-none" data-interior="luxury" data-price="48000" role="radio" aria-checked="false" tabindex="0">
+              <p class="text-sm font-semibold text-white">Luxury</p>
+              <p class="text-xs text-carbon-muted font-mono mt-1">Hand-stitched + gold accent +48,000</p>
+            </button>
+          </div>
+        </div>
+        <div class="scroll-reveal">
+          <p class="font-mono text-[10px] tracking-[0.3em] text-carbon-muted uppercase mb-4">Range Extender</p>
+          <div class="flex items-center gap-4">
+            <button id="range-toggle" class="relative w-12 h-6 bg-carbon-light border border-carbon-border rounded-none transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-volt" role="switch" aria-checked="false" aria-label="Range extender toggle" tabindex="0">
+              <span class="absolute top-0.5 left-0.5 w-5 h-5 bg-carbon-muted transition-all duration-200 rounded-none" id="range-toggle-knob"></span>
+            </button>
+            <div>
+              <p class="text-sm font-semibold text-white">Solid-State 150 kWh Pack</p>
+              <p class="text-xs text-carbon-muted font-mono">+30 kWh capacity &middot; +180 km range &middot; +38,000</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="lg:col-span-2">
+        <div class="scroll-reveal sticky top-24 border border-carbon-border p-6 sm:p-8 rounded-none" style="background: linear-gradient(180deg, #141414 0%, #0A0A0A 100%);">
+          <p class="font-mono text-[10px] tracking-[0.3em] text-carbon-muted uppercase mb-6">Configuration Summary</p>
+          <div class="space-y-4 mb-8">
+            <div class="flex justify-between items-center py-2 border-b border-carbon-border/30">
+              <span class="text-sm text-carbon-text">Base Vehicle</span>
+              <span class="text-sm font-mono text-white">2,400,000</span>
+            </div>
+            <div class="flex justify-between items-center py-2 border-b border-carbon-border/30">
+              <span class="text-sm text-carbon-text">Exterior</span>
+              <span class="text-sm font-mono text-white" id="summary-exterior">Obsidian Black</span>
+            </div>
+            <div class="flex justify-between items-center py-2 border-b border-carbon-border/30">
+              <span class="text-sm text-carbon-text">Wheels</span>
+              <span class="text-sm font-mono text-white" id="summary-wheels">Aero Blade</span>
+            </div>
+            <div class="flex justify-between items-center py-2 border-b border-carbon-border/30">
+              <span class="text-sm text-carbon-text">Interior</span>
+              <span class="text-sm font-mono text-white" id="summary-interior">Essential</span>
+            </div>
+            <div class="flex justify-between items-center py-2 border-b border-carbon-border/30">
+              <span class="text-sm text-carbon-text">Range Extender</span>
+              <span class="text-sm font-mono text-white" id="summary-range">No</span>
+            </div>
+          </div>
+          <div class="flex justify-between items-center pt-4 border-t border-carbon-border">
+            <span class="text-sm font-semibold text-white">Estimated Total</span>
+            <span class="text-2xl font-bold font-mono text-volt" id="summary-total">2,400,000</span>
+          </div>
+          <p class="text-[10px] text-carbon-muted font-mono mt-1">EUR &middot; Excl. local taxes</p>
+          <button id="reserve-btn" class="w-full mt-6 py-3 bg-volt text-carbon font-semibold text-sm tracking-wide rounded-none hover:bg-volt-dim transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-volt focus-visible:ring-offset-2 focus-visible:ring-offset-carbon">
+            Reserve Configuration
+          </button>
+          <div id="reserve-feedback" class="hidden mt-3 text-center text-sm text-volt font-mono" role="status" aria-live="polite"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="specifications" class="relative py-24 sm:py-32 border-t border-carbon-border/30">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="scroll-reveal mb-16">
+      <p class="font-mono text-[10px] tracking-[0.4em] text-volt uppercase mb-3">Engineering</p>
+      <h2 class="text-3xl sm:text-4xl font-bold tracking-tight">Structural Specifications</h2>
+    </div>
+    <div class="scroll-reveal border border-carbon-border/50">
+      <div class="grid grid-cols-[1fr_1px_1fr] sm:grid-cols-[1fr_1px_1fr_1px_1fr]">
+        <div class="p-4 sm:p-6 bg-carbon-mid/50">
+          <p class="font-mono text-[10px] tracking-[0.3em] text-carbon-muted uppercase">Category</p>
+        </div>
+        <div class="bg-carbon-border/30 hidden sm:block"></div>
+        <div class="p-4 sm:p-6 bg-carbon-mid/50">
+          <p class="font-mono text-[10px] tracking-[0.3em] text-carbon-muted uppercase">Specification</p>
+        </div>
+        <div class="bg-carbon-border/30 hidden sm:block"></div>
+        <div class="p-4 sm:p-6 bg-carbon-mid/50">
+          <p class="font-mono text-[10px] tracking-[0.3em] text-carbon-muted uppercase">Detail</p>
+        </div>
+      </div>
+      <div class="spec-row grid grid-cols-[1fr_1px_1fr] sm:grid-cols-[1fr_1px_1fr_1px_1fr] border-t border-carbon-border/20">
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text">Chassis</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-white font-medium">Construction</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text font-mono">Carbon-fiber monocoque</p></div>
+      </div>
+      <div class="spec-row grid grid-cols-[1fr_1px_1fr] sm:grid-cols-[1fr_1px_1fr_1px_1fr] border-t border-carbon-border/20">
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text">Chassis</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-white font-medium">Weight Distribution</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text font-mono">52 / 48 (F/R)</p></div>
+      </div>
+      <div class="spec-row grid grid-cols-[1fr_1px_1fr] sm:grid-cols-[1fr_1px_1fr_1px_1fr] border-t border-carbon-border/20">
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text">Suspension</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-white font-medium">Front</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text font-mono">Double wishbone, pushrod</p></div>
+      </div>
+      <div class="spec-row grid grid-cols-[1fr_1px_1fr] sm:grid-cols-[1fr_1px_1fr_1px_1fr] border-t border-carbon-border/20">
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text">Suspension</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-white font-medium">Rear</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text font-mono">Multi-link, active anti-roll</p></div>
+      </div>
+      <div class="spec-row grid grid-cols-[1fr_1px_1fr] sm:grid-cols-[1fr_1px_1fr_1px_1fr] border-t border-carbon-border/20">
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text">Brakes</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-white font-medium">System</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text font-mono">Carbon-ceramic, 420mm F / 390mm R</p></div>
+      </div>
+      <div class="spec-row grid grid-cols-[1fr_1px_1fr] sm:grid-cols-[1fr_1px_1fr_1px_1fr] border-t border-carbon-border/20">
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text">Brakes</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-white font-medium">Regeneration</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text font-mono">Adjustable, max 0.4g recoup</p></div>
+      </div>
+      <div class="spec-row grid grid-cols-[1fr_1px_1fr] sm:grid-cols-[1fr_1px_1fr_1px_1fr] border-t border-carbon-border/20">
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text">Aerodynamics</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-white font-medium">Active Elements</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text font-mono">Rear wing, front splitter, underbody diffuser</p></div>
+      </div>
+      <div class="spec-row grid grid-cols-[1fr_1px_1fr] sm:grid-cols-[1fr_1px_1fr_1px_1fr] border-t border-carbon-border/20">
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text">Aerodynamics</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-white font-medium">Drag Coefficient</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text font-mono">0.198 Cd (low-drag mode)</p></div>
+      </div>
+      <div class="spec-row grid grid-cols-[1fr_1px_1fr] sm:grid-cols-[1fr_1px_1fr_1px_1fr] border-t border-carbon-border/20">
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text">Dimensions</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-white font-medium">Length &times; Width &times; Height</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text font-mono">4,680 &times; 2,080 &times; 1,140 mm</p></div>
+      </div>
+      <div class="spec-row grid grid-cols-[1fr_1px_1fr] sm:grid-cols-[1fr_1px_1fr_1px_1fr] border-t border-carbon-border/20">
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text">Dimensions</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-white font-medium">Wheelbase</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text font-mono">2,730 mm</p></div>
+      </div>
+      <div class="spec-row grid grid-cols-[1fr_1px_1fr] sm:grid-cols-[1fr_1px_1fr_1px_1fr] border-t border-carbon-border/20">
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text">Tires</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-white font-medium">Standard Fitment</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text font-mono">Michelin Pilot Sport EV, 265/35 ZR21 F / 325/30 ZR21 R</p></div>
+      </div>
+      <div class="spec-row grid grid-cols-[1fr_1px_1fr] sm:grid-cols-[1fr_1px_1fr_1px_1fr] border-t border-carbon-border/20">
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text">Electrical</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-white font-medium">Architecture</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text font-mono">900V DC, SiC inverter</p></div>
+      </div>
+      <div class="spec-row grid grid-cols-[1fr_1px_1fr] sm:grid-cols-[1fr_1px_1fr_1px_1fr] border-t border-carbon-border/20">
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text">Electrical</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-white font-medium">Charging</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text font-mono">CCS2, 350 kW DC / 22 kW AC</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="border-t border-carbon-border/30 py-12">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="flex flex-col sm:flex-row justify-between items-center gap-6">
+      <div class="flex items-center gap-3">
+        <svg width="20" height="20" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+          <path d="M14 2L2 26h10l2-8 2 8h10L14 2z" fill="#C8FF00" opacity="0.6"/>
+        </svg>
+        <span class="text-xs font-mono text-carbon-muted tracking-wider">VOLTAIC &copy; 2026</span>
+      </div>
+      <div class="flex gap-6">
+        <a href="#" class="text-xs font-mono text-carbon-muted hover:text-white transition-colors duration-200">Privacy</a>
+        <a href="#" class="text-xs font-mono text-carbon-muted hover:text-white transition-colors duration-200">Terms</a>
+        <a href="#" class="text-xs font-mono text-carbon-muted hover:text-white transition-colors duration-200">Contact</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function() {
+  const base = 2400000;
+  let wheelPrice = 0;
+  let interiorPrice = 0;
+  let rangePrice = 0;
+  let rangeActive = false;
+
+  function formatPrice(n) {
+    return n.toLocaleString('en-US');
+  }
+
+  function updateTotal() {
+    const total = base + wheelPrice + interiorPrice + rangePrice;
+    document.getElementById('summary-total').textContent = formatPrice(total);
+  }
+
+  function clearGroupActive(container, selector) {
+    container.querySelectorAll(selector).forEach(function(btn) {
+      btn.classList.remove('active');
+      btn.setAttribute('aria-checked', 'false');
+      var dot = btn.querySelector('span');
+      if (dot) dot.style.opacity = '0';
+    });
+  }
+
+  document.querySelectorAll('[data-color]').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var parent = btn.parentElement;
+      clearGroupActive(parent, '[data-color]');
+      btn.classList.add('active');
+      btn.setAttribute('aria-checked', 'true');
+      var dot = btn.querySelector('span');
+      if (dot) dot.style.opacity = '1';
+      document.getElementById('color-label').textContent = btn.dataset.label;
+      document.getElementById('summary-exterior').textContent = btn.dataset.label;
+    });
+  });
+
+  document.querySelectorAll('[data-wheel]').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var parent = btn.parentElement;
+      clearGroupActive(parent, '[data-wheel]');
+      btn.classList.add('active');
+      btn.setAttribute('aria-checked', 'true');
+      wheelPrice = parseInt(btn.dataset.price, 10) || 0;
+      document.getElementById('summary-wheels').textContent = btn.querySelector('p').textContent;
+      updateTotal();
+    });
+  });
+
+  document.querySelectorAll('[data-interior]').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var parent = btn.parentElement;
+      clearGroupActive(parent, '[data-interior]');
+      btn.classList.add('active');
+      btn.setAttribute('aria-checked', 'true');
+      interiorPrice = parseInt(btn.dataset.price, 10) || 0;
+      document.getElementById('summary-interior').textContent = btn.querySelector('p').textContent;
+      updateTotal();
+    });
+  });
+
+  var rangeToggle = document.getElementById('range-toggle');
+  var rangeKnob = document.getElementById('range-toggle-knob');
+  rangeToggle.addEventListener('click', function() {
+    rangeActive = !rangeActive;
+    rangeToggle.setAttribute('aria-checked', rangeActive ? 'true' : 'false');
+    if (rangeActive) {
+      rangeToggle.style.backgroundColor = '#C8FF00';
+      rangeToggle.style.borderColor = '#C8FF00';
+      rangeKnob.style.transform = 'translateX(24px)';
+      rangeKnob.style.backgroundColor = '#0A0A0A';
+      rangePrice = 38000;
+      document.getElementById('summary-range').textContent = 'Yes (+150 kWh)';
+    } else {
+      rangeToggle.style.backgroundColor = '#1E1E1E';
+      rangeToggle.style.borderColor = '#2A2A2A';
+      rangeKnob.style.transform = 'translateX(0)';
+      rangeKnob.style.backgroundColor = '#5A5A5A';
+      rangePrice = 0;
+      document.getElementById('summary-range').textContent = 'No';
+    }
+    updateTotal();
+  });
+
+  var reserveBtn = document.getElementById('reserve-btn');
+  var reserveFeedback = document.getElementById('reserve-feedback');
+  reserveBtn.addEventListener('click', function() {
+    reserveBtn.disabled = true;
+    reserveBtn.textContent = 'Processing...';
+    reserveBtn.style.opacity = '0.7';
+    setTimeout(function() {
+      reserveBtn.textContent = 'Reserved';
+      reserveBtn.style.opacity = '1';
+      reserveFeedback.textContent = 'Configuration saved. Reference: VLX1-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+      reserveFeedback.classList.remove('hidden');
+      setTimeout(function() {
+        reserveBtn.disabled = false;
+        reserveBtn.textContent = 'Reserve Configuration';
+      }, 3000);
+    }, 1200);
+  });
+
+  var mobileMenuBtn = document.getElementById('mobile-menu-btn');
+  var mobileMenu = document.getElementById('mobile-menu');
+  mobileMenuBtn.addEventListener('click', function() {
+    var expanded = mobileMenuBtn.getAttribute('aria-expanded') === 'true';
+    mobileMenuBtn.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+    mobileMenu.classList.toggle('hidden');
+  });
+
+  mobileMenu.querySelectorAll('a').forEach(function(link) {
+    link.addEventListener('click', function() {
+      mobileMenu.classList.add('hidden');
+      mobileMenuBtn.setAttribute('aria-expanded', 'false');
+    });
+  });
+
+  var revealElements = document.querySelectorAll('.scroll-reveal');
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+  revealElements.forEach(function(el) { observer.observe(el); });
+
+  var style = document.createElement('style');
+  style.textContent = '.config-option:focus-visible { outline: 2px solid #C8FF00; outline-offset: 2px; }';
+  document.head.appendChild(style);
+})();
+</script>
+</body>
+</html>
+ + total.toLocaleString('en-US') + ' deposit held.');
+                });
+            }
+
+            const observer = new IntersectionObserver(function(entries) {
+                entries.forEach(function(entry) {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+            document.querySelectorAll('.scroll-reveal').forEach(function(el) {
+                observer.observe(el);
+            });
+        })();
+    </script>
+</body>
+</html><!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VOLTAIC X1 — Electric Hypercar Concept</title>
+<meta name="description" content="VOLTAIC X1: 2,400 hp quad-motor electric hypercar concept. 0-100 km/h in 1.72s. 412 km/h top speed.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        volt: '#C8FF00',
+        'volt-dim': '#8AAD00',
+        carbon: '#0A0A0A',
+        'carbon-mid': '#141414',
+        'carbon-light': '#1E1E1E',
+        'carbon-border': '#2A2A2A',
+        'carbon-text': '#A0A0A0',
+        'carbon-muted': '#5A5A5A',
+      },
+      fontFamily: {
+        display: ['"Space Grotesk"', 'sans-serif'],
+        mono: ['"JetBrains Mono"', 'monospace'],
+      },
+    }
+  }
+}
+</script>
+<style>
+  @keyframes hero-glow {
+    0%, 100% { opacity: 0.3; transform: scale(1); }
+    50% { opacity: 0.6; transform: scale(1.05); }
+  }
+  @keyframes dash-flow {
+    to { stroke-dashoffset: -20; }
+  }
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes pulse-ring {
+    0% { transform: scale(1); opacity: 0.6; }
+    100% { transform: scale(1.8); opacity: 0; }
+  }
+  @keyframes counter-tick {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+  .animate-hero-glow { animation: hero-glow 4s ease-in-out infinite; }
+  .animate-dash-flow { animation: dash-flow 1s linear infinite; }
+  .animate-fade-up { animation: fade-up 0.8s ease-out forwards; opacity: 0; }
+  .animate-fade-up-d1 { animation-delay: 0.1s; }
+  .animate-fade-up-d2 { animation-delay: 0.2s; }
+  .animate-fade-up-d3 { animation-delay: 0.3s; }
+  .animate-fade-up-d4 { animation-delay: 0.4s; }
+  .animate-fade-up-d5 { animation-delay: 0.5s; }
+  .animate-fade-up-d6 { animation-delay: 0.6s; }
+  .animate-fade-up-d7 { animation-delay: 0.7s; }
+  .pulse-ring { animation: pulse-ring 1.5s ease-out infinite; }
+  .counter-tick { animation: counter-tick 2s ease-in-out infinite; }
+  .scroll-reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease-out, transform 0.6s ease-out; }
+  .scroll-reveal.visible { opacity: 1; transform: translateY(0); }
+  .config-option { transition: all 0.2s ease-out; }
+  .config-option:hover { transform: translateY(-2px); }
+  .config-option.active { border-color: #C8FF00 !important; box-shadow: 0 0 20px rgba(200, 255, 0, 0.15); }
+  .spec-row { transition: background-color 0.2s ease; }
+  .spec-row:hover { background-color: rgba(200, 255, 0, 0.03); }
+  .nav-link { position: relative; }
+  .nav-link::after { content: ''; position: absolute; bottom: -2px; left: 0; width: 0; height: 1px; background: #C8FF00; transition: width 0.3s ease; }
+  .nav-link:hover::after { width: 100%; }
+  .hero-stat-value { font-variant-numeric: tabular-nums; }
+  .grid-line { stroke: #2A2A2A; stroke-width: 0.5; }
+  @media (prefers-reduced-motion: reduce) {
+    .animate-hero-glow, .animate-dash-flow, .pulse-ring, .counter-tick { animation: none; }
+    .scroll-reveal { opacity: 1; transform: none; transition: none; }
+    .animate-fade-up { animation: none; opacity: 1; }
+    .config-option:hover { transform: none; }
+  }
+  ::selection { background: rgba(200, 255, 0, 0.3); color: #fff; }
+  :focus-visible { outline: 2px solid #C8FF00; outline-offset: 2px; }
+  body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+</style>
+</head>
+<body class="bg-carbon text-white font-display antialiased">
+
+<a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-volt focus:text-carbon focus:font-semibold focus:rounded">Skip to main content</a>
+
+<header class="fixed top-0 left-0 right-0 z-40 border-b border-carbon-border/50" style="background: rgba(10,10,10,0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);">
+  <nav class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between" aria-label="Primary navigation">
+    <a href="#" class="flex items-center gap-3 group" aria-label="VOLTAIC home">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+        <path d="M14 2L2 26h10l2-8 2 8h10L14 2z" fill="#C8FF00" opacity="0.9"/>
+        <path d="M14 10l-5 12h3l2-6 2 6h3L14 10z" fill="#0A0A0A"/>
+      </svg>
+      <span class="text-sm font-semibold tracking-[0.3em] text-white group-hover:text-volt transition-colors duration-200">VOLTAIC</span>
+    </a>
+    <div class="hidden md:flex items-center gap-8">
+      <a href="#hero" class="nav-link text-xs font-medium tracking-[0.2em] text-carbon-text hover:text-white transition-colors duration-200">X1</a>
+      <a href="#performance" class="nav-link text-xs font-medium tracking-[0.2em] text-carbon-text hover:text-white transition-colors duration-200">PERFORMANCE</a>
+      <a href="#configure" class="nav-link text-xs font-medium tracking-[0.2em] text-carbon-text hover:text-white transition-colors duration-200">CONFIGURE</a>
+      <a href="#specifications" class="nav-link text-xs font-medium tracking-[0.2em] text-carbon-text hover:text-white transition-colors duration-200">SPECS</a>
+    </div>
+    <button id="mobile-menu-btn" class="md:hidden p-2 text-carbon-text hover:text-white transition-colors" aria-label="Toggle menu" aria-expanded="false">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+  </nav>
+  <div id="mobile-menu" class="md:hidden hidden border-t border-carbon-border/50 px-6 py-4 space-y-3" style="background: rgba(10,10,10,0.95);">
+    <a href="#hero" class="block text-xs font-medium tracking-[0.2em] text-carbon-text hover:text-volt py-2">X1</a>
+    <a href="#performance" class="block text-xs font-medium tracking-[0.2em] text-carbon-text hover:text-volt py-2">PERFORMANCE</a>
+    <a href="#configure" class="block text-xs font-medium tracking-[0.2em] text-carbon-text hover:text-volt py-2">CONFIGURE</a>
+    <a href="#specifications" class="block text-xs font-medium tracking-[0.2em] text-carbon-text hover:text-volt py-2">SPECS</a>
+  </div>
+</header>
+
+<main id="main">
+
+<section id="hero" class="relative min-h-screen flex items-center overflow-hidden pt-16">
+  <div class="absolute inset-0 pointer-events-none" aria-hidden="true">
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full animate-hero-glow" style="background: radial-gradient(circle, rgba(200,255,0,0.08) 0%, transparent 70%);"></div>
+    <svg class="absolute inset-0 w-full h-full opacity-[0.04]" aria-hidden="true"><defs><pattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse"><path d="M 60 0 L 0 0 0 60" fill="none" class="grid-line"/></pattern></defs><rect width="100%" height="100%" fill="url(#grid)"/></svg>
+    <div class="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-carbon-border to-transparent"></div>
+  </div>
+  <div class="relative max-w-7xl mx-auto px-6 py-20 w-full">
+    <div class="grid lg:grid-cols-2 gap-16 items-center">
+      <div class="space-y-8">
+        <div class="animate-fade-up">
+          <p class="font-mono text-[10px] tracking-[0.4em] text-volt uppercase mb-4">Concept Prototype 2026</p>
+          <h1 class="text-6xl sm:text-7xl lg:text-8xl font-bold tracking-tight leading-[0.9]">
+            <span class="block text-white">VOLTAIC</span>
+            <span class="block text-volt">X1</span>
+          </h1>
+        </div>
+        <p class="animate-fade-up animate-fade-up-d2 text-carbon-text text-base sm:text-lg leading-relaxed max-w-md font-light">
+          Quad-motor electric hypercar. 2,400 hp directed through four independent axial-flux power units. No transmission. No latency. Pure force, vectorized.
+        </p>
+        <div class="animate-fade-up animate-fade-up-d3 flex flex-wrap gap-4">
+          <a href="#configure" class="inline-flex items-center gap-2 px-6 py-3 bg-volt text-carbon font-semibold text-sm tracking-wide rounded-none hover:bg-volt-dim transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-volt focus-visible:ring-offset-2 focus-visible:ring-offset-carbon">
+            Configure Yours
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+          </a>
+          <a href="#performance" class="inline-flex items-center gap-2 px-6 py-3 border border-carbon-border text-white font-medium text-sm tracking-wide rounded-none hover:border-carbon-text transition-colors duration-200">
+            Explore Data
+          </a>
+        </div>
+      </div>
+      <div class="relative flex items-center justify-center" aria-hidden="true">
+        <svg viewBox="0 0 500 280" class="w-full max-w-lg" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M60 200 Q80 120 140 110 L200 105 Q240 100 260 90 L300 75 Q340 60 380 65 Q420 70 440 90 L450 100" stroke="#C8FF00" stroke-width="1.5" opacity="0.6"/>
+          <path d="M60 200 Q80 130 140 115 L200 110 Q250 105 280 95 L320 80 Q360 65 400 70 L440 85 L450 95" stroke="#C8FF00" stroke-width="0.8" opacity="0.3"/>
+          <path d="M80 210 Q100 140 160 130 L220 125 Q270 120 300 110 L350 95 Q390 80 430 85 L455 100 L460 110 L450 120" stroke="#2A2A2A" stroke-width="1" fill="none"/>
+          <path d="M100 215 Q120 150 180 140 L240 135 Q290 130 320 120 L370 105 Q410 90 445 95 L460 110 L455 125 L440 135 Q400 150 360 155 L300 165 Q240 175 200 180 L140 190 Q100 200 80 215 Z" fill="#141414" stroke="#2A2A2A" stroke-width="0.5"/>
+          <ellipse cx="130" cy="195" rx="28" ry="28" fill="#0A0A0A" stroke="#2A2A2A" stroke-width="1"/>
+          <ellipse cx="130" cy="195" rx="18" ry="18" fill="#141414" stroke="#3A3A3A" stroke-width="0.5"/>
+          <ellipse cx="130" cy="195" rx="6" ry="6" fill="#2A2A2A"/>
+          <ellipse cx="390" cy="140" rx="28" ry="28" fill="#0A0A0A" stroke="#2A2A2A" stroke-width="1"/>
+          <ellipse cx="390" cy="140" rx="18" ry="18" fill="#141414" stroke="#3A3A3A" stroke-width="0.5"/>
+          <ellipse cx="390" cy="140" rx="6" ry="6" fill="#2A2A2A"/>
+          <line x1="200" y1="80" x2="200" y2="60" stroke="#C8FF00" stroke-width="0.5" opacity="0.4" stroke-dasharray="4 4" class="animate-dash-flow"/>
+          <line x1="300" y1="55" x2="300" y2="35" stroke="#C8FF00" stroke-width="0.5" opacity="0.4" stroke-dasharray="4 4" class="animate-dash-flow"/>
+          <circle cx="200" cy="58" r="2" fill="#C8FF00" opacity="0.6"/>
+          <circle cx="300" cy="33" r="2" fill="#C8FF00" opacity="0.6"/>
+          <text x="195" y="52" font-family="JetBrains Mono, monospace" font-size="7" fill="#C8FF00" opacity="0.5">FLUX</text>
+          <text x="295" y="27" font-family="JetBrains Mono, monospace" font-size="7" fill="#C8FF00" opacity="0.5">CORE</text>
+        </svg>
+      </div>
+    </div>
+    <div class="mt-16 pt-8 border-t border-carbon-border/50 grid grid-cols-2 md:grid-cols-4 gap-8">
+      <div class="animate-fade-up animate-fade-up-d4">
+        <p class="font-mono text-[10px] tracking-[0.3em] text-carbon-muted uppercase mb-2">0 – 100 km/h</p>
+        <p class="text-4xl sm:text-5xl font-bold text-white hero-stat-value">1.72<span class="text-volt text-2xl ml-1">s</span></p>
+      </div>
+      <div class="animate-fade-up animate-fade-up-d5">
+        <p class="font-mono text-[10px] tracking-[0.3em] text-carbon-muted uppercase mb-2">Peak Power</p>
+        <p class="text-4xl sm:text-5xl font-bold text-white hero-stat-value">2,400<span class="text-volt text-2xl ml-1">hp</span></p>
+      </div>
+      <div class="animate-fade-up animate-fade-up-d6">
+        <p class="font-mono text-[10px] tracking-[0.3em] text-carbon-muted uppercase mb-2">Top Speed</p>
+        <p class="text-4xl sm:text-5xl font-bold text-white hero-stat-value">412<span class="text-volt text-2xl ml-1">km/h</span></p>
+      </div>
+      <div class="animate-fade-up animate-fade-up-d7">
+        <p class="font-mono text-[10px] tracking-[0.3em] text-carbon-muted uppercase mb-2">Range</p>
+        <p class="text-4xl sm:text-5xl font-bold text-white hero-stat-value">580<span class="text-volt text-2xl ml-1">km</span></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="performance" class="relative py-24 sm:py-32 border-t border-carbon-border/30">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="scroll-reveal mb-16">
+      <p class="font-mono text-[10px] tracking-[0.4em] text-volt uppercase mb-3">Mechanical / Aerodynamic</p>
+      <h2 class="text-3xl sm:text-4xl font-bold tracking-tight">Data Matrix</h2>
+    </div>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-px bg-carbon-border/30">
+      <div class="scroll-reveal bg-carbon p-6 sm:p-8 group">
+        <p class="font-mono text-[10px] tracking-[0.3em] text-carbon-muted uppercase mb-4">Powertrain</p>
+        <p class="text-3xl sm:text-4xl font-bold text-white mb-1 font-mono">2,400<span class="text-volt text-lg ml-1">hp</span></p>
+        <p class="text-sm text-carbon-text leading-relaxed">Quad axial-flux motors. Each unit generates 600 hp independently with sub-5ms torque response.</p>
+      </div>
+      <div class="scroll-reveal bg-carbon p-6 sm:p-8 group">
+        <p class="font-mono text-[10px] tracking-[0.3em] text-carbon-muted uppercase mb-4">Peak Torque</p>
+        <p class="text-3xl sm:text-4xl font-bold text-white mb-1 font-mono">2,800<span class="text-volt text-lg ml-1">Nm</span></p>
+        <p class="text-sm text-carbon-text leading-relaxed">Available from zero RPM. Full torque vectoring across all four corners via independent inverters.</p>
+      </div>
+      <div class="scroll-reveal bg-carbon p-6 sm:p-8 group">
+        <p class="font-mono text-[10px] tracking-[0.3em] text-carbon-muted uppercase mb-4">Acceleration</p>
+        <p class="text-3xl sm:text-4xl font-bold text-white mb-1 font-mono">1.72<span class="text-volt text-lg ml-1">s</span></p>
+        <p class="text-sm text-carbon-text leading-relaxed">0–100 km/h with launch control. Active aero suspension drops 40mm for maximum mechanical grip.</p>
+      </div>
+      <div class="scroll-reveal bg-carbon p-6 sm:p-8 group">
+        <p class="font-mono text-[10px] tracking-[0.3em] text-carbon-muted uppercase mb-4">Top Speed</p>
+        <p class="text-3xl sm:text-4xl font-bold text-white mb-1 font-mono">412<span class="text-volt text-lg ml-1">km/h</span></p>
+        <p class="text-sm text-carbon-text leading-relaxed">Electronically governed. Active rear wing deploys at 280 km/h generating 820 kg downforce.</p>
+      </div>
+      <div class="scroll-reveal bg-carbon p-6 sm:p-8 group">
+        <p class="font-mono text-[10px] tracking-[0.3em] text-carbon-muted uppercase mb-4">Drag Coefficient</p>
+        <p class="text-3xl sm:text-4xl font-bold text-white mb-1 font-mono">0.198<span class="text-volt text-lg ml-1">Cd</span></p>
+        <p class="text-sm text-carbon-text leading-relaxed">Active underbody diffuser and morphing front intake. Lowest Cd in production-intent hypercar class.</p>
+      </div>
+      <div class="scroll-reveal bg-carbon p-6 sm:p-8 group">
+        <p class="font-mono text-[10px] tracking-[0.3em] text-carbon-muted uppercase mb-4">Downforce @ 300</p>
+        <p class="text-3xl sm:text-4xl font-bold text-white mb-1 font-mono">1,400<span class="text-volt text-lg ml-1">kg</span></p>
+        <p class="text-sm text-carbon-text leading-relaxed">Full aero mode: active wing, underbody ground effect, and front splitter generate race-car-level grip.</p>
+      </div>
+      <div class="scroll-reveal bg-carbon p-6 sm:p-8 group">
+        <p class="font-mono text-[10px] tracking-[0.3em] text-carbon-muted uppercase mb-4">Battery System</p>
+        <p class="text-3xl sm:text-4xl font-bold text-white mb-1 font-mono">120<span class="text-volt text-lg ml-1">kWh</span></p>
+        <p class="text-sm text-carbon-text leading-relaxed">Silicon-anode solid-state cells. 900V architecture enabling 350 kW DC fast charging.</p>
+      </div>
+      <div class="scroll-reveal bg-carbon p-6 sm:p-8 group">
+        <p class="font-mono text-[10px] tracking-[0.3em] text-carbon-muted uppercase mb-4">Charge Rate</p>
+        <p class="text-3xl sm:text-4xl font-bold text-white mb-1 font-mono">350<span class="text-volt text-lg ml-1">kW</span></p>
+        <p class="text-sm text-carbon-text leading-relaxed">10–80% in 12 minutes. 800V/900V dual-voltage architecture with active thermal pre-conditioning.</p>
+      </div>
+      <div class="scroll-reveal bg-carbon p-6 sm:p-8 group">
+        <p class="font-mono text-[10px] tracking-[0.3em] text-carbon-muted uppercase mb-4">Curb Weight</p>
+        <p class="text-3xl sm:text-4xl font-bold text-white mb-1 font-mono">1,680<span class="text-volt text-lg ml-1">kg</span></p>
+        <p class="text-sm text-carbon-text leading-relaxed">Full carbon-fiber monocoque with integrated battery structural floor. 52/48 weight distribution.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="configure" class="relative py-24 sm:py-32 border-t border-carbon-border/30">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="scroll-reveal mb-16">
+      <p class="font-mono text-[10px] tracking-[0.4em] text-volt uppercase mb-3">Interactive</p>
+      <h2 class="text-3xl sm:text-4xl font-bold tracking-tight">Configure Your X1</h2>
+    </div>
+    <div class="grid lg:grid-cols-5 gap-8">
+      <div class="lg:col-span-3 space-y-10">
+        <div class="scroll-reveal">
+          <p class="font-mono text-[10px] tracking-[0.3em] text-carbon-muted uppercase mb-4">Exterior Finish</p>
+          <div class="flex flex-wrap gap-3" role="radiogroup" aria-label="Exterior color selection">
+            <button class="config-option active w-12 h-12 rounded-none border-2 border-carbon-border relative" style="background: #0A0A0A;" data-color="obsidian" data-label="Obsidian Black" aria-label="Obsidian Black" role="radio" aria-checked="true" tabindex="0">
+              <span class="absolute -top-1 -right-1 w-3 h-3 bg-volt rounded-full opacity-100 transition-opacity duration-200"></span>
+            </button>
+            <button class="config-option w-12 h-12 rounded-none border-2 border-carbon-border relative" style="background: #1a1a2e;" data-color="quantum" data-label="Quantum Navy" aria-label="Quantum Navy" role="radio" aria-checked="false" tabindex="0">
+              <span class="absolute -top-1 -right-1 w-3 h-3 bg-volt rounded-full opacity-0 transition-opacity duration-200"></span>
+            </button>
+            <button class="config-option w-12 h-12 rounded-none border-2 border-carbon-border relative" style="background: #2d1b1b;" data-color="supernova" data-label="Supernova Burgundy" aria-label="Supernova Burgundy" role="radio" aria-checked="false" tabindex="0">
+              <span class="absolute -top-1 -right-1 w-3 h-3 bg-volt rounded-full opacity-0 transition-opacity duration-200"></span>
+            </button>
+            <button class="config-option w-12 h-12 rounded-none border-2 border-carbon-border relative" style="background: #C8FF00;" data-color="volt" data-label="Volt Yellow" aria-label="Volt Yellow" role="radio" aria-checked="false" tabindex="0">
+              <span class="absolute -top-1 -right-1 w-3 h-3 bg-volt rounded-full opacity-0 transition-opacity duration-200"></span>
+            </button>
+            <button class="config-option w-12 h-12 rounded-none border-2 border-carbon-border relative" style="background: linear-gradient(135deg, #0A0A0A 0%, #C8FF00 50%, #0A0A0A 100%);" data-color="flux" data-label="Flux Gradient" aria-label="Flux Gradient" role="radio" aria-checked="false" tabindex="0">
+              <span class="absolute -top-1 -right-1 w-3 h-3 bg-volt rounded-full opacity-0 transition-opacity duration-200"></span>
+            </button>
+          </div>
+          <p id="color-label" class="mt-3 text-sm text-carbon-text font-mono">Obsidian Black</p>
+        </div>
+        <div class="scroll-reveal">
+          <p class="font-mono text-[10px] tracking-[0.3em] text-carbon-muted uppercase mb-4">Wheel System</p>
+          <div class="grid grid-cols-2 gap-3" role="radiogroup" aria-label="Wheel selection">
+            <button class="config-option active border border-carbon-border p-4 text-left rounded-none" data-wheel="aero" data-price="0" role="radio" aria-checked="true" tabindex="0">
+              <p class="text-sm font-semibold text-white">Aero Blade</p>
+              <p class="text-xs text-carbon-muted font-mono mt-1">21" forged magnesium</p>
+            </button>
+            <button class="config-option border border-carbon-border p-4 text-left rounded-none" data-wheel="track" data-price="12000" role="radio" aria-checked="false" tabindex="0">
+              <p class="text-sm font-semibold text-white">Track Carbon</p>
+              <p class="text-xs text-carbon-muted font-mono mt-1">20" carbon fiber +12,000</p>
+            </button>
+          </div>
+        </div>
+        <div class="scroll-reveal">
+          <p class="font-mono text-[10px] tracking-[0.3em] text-carbon-muted uppercase mb-4">Interior Package</p>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3" role="radiogroup" aria-label="Interior package selection">
+            <button class="config-option active border border-carbon-border p-4 text-left rounded-none" data-interior="base" data-price="0" role="radio" aria-checked="true" tabindex="0">
+              <p class="text-sm font-semibold text-white">Essential</p>
+              <p class="text-xs text-carbon-muted font-mono mt-1">Alcantara + carbon</p>
+            </button>
+            <button class="config-option border border-carbon-border p-4 text-left rounded-none" data-interior="performance" data-price="24000" role="radio" aria-checked="false" tabindex="0">
+              <p class="text-sm font-semibold text-white">Performance</p>
+              <p class="text-xs text-carbon-muted font-mono mt-1">Full leather + race seats +24,000</p>
+            </button>
+            <button class="config-option border border-carbon-border p-4 text-left rounded-none" data-interior="luxury" data-price="48000" role="radio" aria-checked="false" tabindex="0">
+              <p class="text-sm font-semibold text-white">Luxury</p>
+              <p class="text-xs text-carbon-muted font-mono mt-1">Hand-stitched + gold accent +48,000</p>
+            </button>
+          </div>
+        </div>
+        <div class="scroll-reveal">
+          <p class="font-mono text-[10px] tracking-[0.3em] text-carbon-muted uppercase mb-4">Range Extender</p>
+          <div class="flex items-center gap-4">
+            <button id="range-toggle" class="relative w-12 h-6 bg-carbon-light border border-carbon-border rounded-none transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-volt" role="switch" aria-checked="false" aria-label="Range extender toggle" tabindex="0">
+              <span class="absolute top-0.5 left-0.5 w-5 h-5 bg-carbon-muted transition-all duration-200 rounded-none" id="range-toggle-knob"></span>
+            </button>
+            <div>
+              <p class="text-sm font-semibold text-white">Solid-State 150 kWh Pack</p>
+              <p class="text-xs text-carbon-muted font-mono">+30 kWh capacity &middot; +180 km range &middot; +38,000</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="lg:col-span-2">
+        <div class="scroll-reveal sticky top-24 border border-carbon-border p-6 sm:p-8 rounded-none" style="background: linear-gradient(180deg, #141414 0%, #0A0A0A 100%);">
+          <p class="font-mono text-[10px] tracking-[0.3em] text-carbon-muted uppercase mb-6">Configuration Summary</p>
+          <div class="space-y-4 mb-8">
+            <div class="flex justify-between items-center py-2 border-b border-carbon-border/30">
+              <span class="text-sm text-carbon-text">Base Vehicle</span>
+              <span class="text-sm font-mono text-white">2,400,000</span>
+            </div>
+            <div class="flex justify-between items-center py-2 border-b border-carbon-border/30">
+              <span class="text-sm text-carbon-text">Exterior</span>
+              <span class="text-sm font-mono text-white" id="summary-exterior">Obsidian Black</span>
+            </div>
+            <div class="flex justify-between items-center py-2 border-b border-carbon-border/30">
+              <span class="text-sm text-carbon-text">Wheels</span>
+              <span class="text-sm font-mono text-white" id="summary-wheels">Aero Blade</span>
+            </div>
+            <div class="flex justify-between items-center py-2 border-b border-carbon-border/30">
+              <span class="text-sm text-carbon-text">Interior</span>
+              <span class="text-sm font-mono text-white" id="summary-interior">Essential</span>
+            </div>
+            <div class="flex justify-between items-center py-2 border-b border-carbon-border/30">
+              <span class="text-sm text-carbon-text">Range Extender</span>
+              <span class="text-sm font-mono text-white" id="summary-range">No</span>
+            </div>
+          </div>
+          <div class="flex justify-between items-center pt-4 border-t border-carbon-border">
+            <span class="text-sm font-semibold text-white">Estimated Total</span>
+            <span class="text-2xl font-bold font-mono text-volt" id="summary-total">2,400,000</span>
+          </div>
+          <p class="text-[10px] text-carbon-muted font-mono mt-1">EUR &middot; Excl. local taxes</p>
+          <button id="reserve-btn" class="w-full mt-6 py-3 bg-volt text-carbon font-semibold text-sm tracking-wide rounded-none hover:bg-volt-dim transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-volt focus-visible:ring-offset-2 focus-visible:ring-offset-carbon">
+            Reserve Configuration
+          </button>
+          <div id="reserve-feedback" class="hidden mt-3 text-center text-sm text-volt font-mono" role="status" aria-live="polite"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="specifications" class="relative py-24 sm:py-32 border-t border-carbon-border/30">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="scroll-reveal mb-16">
+      <p class="font-mono text-[10px] tracking-[0.4em] text-volt uppercase mb-3">Engineering</p>
+      <h2 class="text-3xl sm:text-4xl font-bold tracking-tight">Structural Specifications</h2>
+    </div>
+    <div class="scroll-reveal border border-carbon-border/50">
+      <div class="grid grid-cols-[1fr_1px_1fr] sm:grid-cols-[1fr_1px_1fr_1px_1fr]">
+        <div class="p-4 sm:p-6 bg-carbon-mid/50">
+          <p class="font-mono text-[10px] tracking-[0.3em] text-carbon-muted uppercase">Category</p>
+        </div>
+        <div class="bg-carbon-border/30 hidden sm:block"></div>
+        <div class="p-4 sm:p-6 bg-carbon-mid/50">
+          <p class="font-mono text-[10px] tracking-[0.3em] text-carbon-muted uppercase">Specification</p>
+        </div>
+        <div class="bg-carbon-border/30 hidden sm:block"></div>
+        <div class="p-4 sm:p-6 bg-carbon-mid/50">
+          <p class="font-mono text-[10px] tracking-[0.3em] text-carbon-muted uppercase">Detail</p>
+        </div>
+      </div>
+      <div class="spec-row grid grid-cols-[1fr_1px_1fr] sm:grid-cols-[1fr_1px_1fr_1px_1fr] border-t border-carbon-border/20">
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text">Chassis</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-white font-medium">Construction</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text font-mono">Carbon-fiber monocoque</p></div>
+      </div>
+      <div class="spec-row grid grid-cols-[1fr_1px_1fr] sm:grid-cols-[1fr_1px_1fr_1px_1fr] border-t border-carbon-border/20">
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text">Chassis</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-white font-medium">Weight Distribution</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text font-mono">52 / 48 (F/R)</p></div>
+      </div>
+      <div class="spec-row grid grid-cols-[1fr_1px_1fr] sm:grid-cols-[1fr_1px_1fr_1px_1fr] border-t border-carbon-border/20">
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text">Suspension</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-white font-medium">Front</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text font-mono">Double wishbone, pushrod</p></div>
+      </div>
+      <div class="spec-row grid grid-cols-[1fr_1px_1fr] sm:grid-cols-[1fr_1px_1fr_1px_1fr] border-t border-carbon-border/20">
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text">Suspension</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-white font-medium">Rear</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text font-mono">Multi-link, active anti-roll</p></div>
+      </div>
+      <div class="spec-row grid grid-cols-[1fr_1px_1fr] sm:grid-cols-[1fr_1px_1fr_1px_1fr] border-t border-carbon-border/20">
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text">Brakes</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-white font-medium">System</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text font-mono">Carbon-ceramic, 420mm F / 390mm R</p></div>
+      </div>
+      <div class="spec-row grid grid-cols-[1fr_1px_1fr] sm:grid-cols-[1fr_1px_1fr_1px_1fr] border-t border-carbon-border/20">
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text">Brakes</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-white font-medium">Regeneration</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text font-mono">Adjustable, max 0.4g recoup</p></div>
+      </div>
+      <div class="spec-row grid grid-cols-[1fr_1px_1fr] sm:grid-cols-[1fr_1px_1fr_1px_1fr] border-t border-carbon-border/20">
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text">Aerodynamics</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-white font-medium">Active Elements</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text font-mono">Rear wing, front splitter, underbody diffuser</p></div>
+      </div>
+      <div class="spec-row grid grid-cols-[1fr_1px_1fr] sm:grid-cols-[1fr_1px_1fr_1px_1fr] border-t border-carbon-border/20">
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text">Aerodynamics</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-white font-medium">Drag Coefficient</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text font-mono">0.198 Cd (low-drag mode)</p></div>
+      </div>
+      <div class="spec-row grid grid-cols-[1fr_1px_1fr] sm:grid-cols-[1fr_1px_1fr_1px_1fr] border-t border-carbon-border/20">
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text">Dimensions</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-white font-medium">Length &times; Width &times; Height</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text font-mono">4,680 &times; 2,080 &times; 1,140 mm</p></div>
+      </div>
+      <div class="spec-row grid grid-cols-[1fr_1px_1fr] sm:grid-cols-[1fr_1px_1fr_1px_1fr] border-t border-carbon-border/20">
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text">Dimensions</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-white font-medium">Wheelbase</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text font-mono">2,730 mm</p></div>
+      </div>
+      <div class="spec-row grid grid-cols-[1fr_1px_1fr] sm:grid-cols-[1fr_1px_1fr_1px_1fr] border-t border-carbon-border/20">
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text">Tires</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-white font-medium">Standard Fitment</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text font-mono">Michelin Pilot Sport EV, 265/35 ZR21 F / 325/30 ZR21 R</p></div>
+      </div>
+      <div class="spec-row grid grid-cols-[1fr_1px_1fr] sm:grid-cols-[1fr_1px_1fr_1px_1fr] border-t border-carbon-border/20">
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text">Electrical</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-white font-medium">Architecture</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text font-mono">900V DC, SiC inverter</p></div>
+      </div>
+      <div class="spec-row grid grid-cols-[1fr_1px_1fr] sm:grid-cols-[1fr_1px_1fr_1px_1fr] border-t border-carbon-border/20">
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text">Electrical</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-white font-medium">Charging</p></div>
+        <div class="bg-carbon-border/20 hidden sm:block"></div>
+        <div class="p-4 sm:p-6"><p class="text-sm text-carbon-text font-mono">CCS2, 350 kW DC / 22 kW AC</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="border-t border-carbon-border/30 py-12">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="flex flex-col sm:flex-row justify-between items-center gap-6">
+      <div class="flex items-center gap-3">
+        <svg width="20" height="20" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+          <path d="M14 2L2 26h10l2-8 2 8h10L14 2z" fill="#C8FF00" opacity="0.6"/>
+        </svg>
+        <span class="text-xs font-mono text-carbon-muted tracking-wider">VOLTAIC &copy; 2026</span>
+      </div>
+      <div class="flex gap-6">
+        <a href="#" class="text-xs font-mono text-carbon-muted hover:text-white transition-colors duration-200">Privacy</a>
+        <a href="#" class="text-xs font-mono text-carbon-muted hover:text-white transition-colors duration-200">Terms</a>
+        <a href="#" class="text-xs font-mono text-carbon-muted hover:text-white transition-colors duration-200">Contact</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function() {
+  const base = 2400000;
+  let wheelPrice = 0;
+  let interiorPrice = 0;
+  let rangePrice = 0;
+  let rangeActive = false;
+
+  function formatPrice(n) {
+    return n.toLocaleString('en-US');
+  }
+
+  function updateTotal() {
+    const total = base + wheelPrice + interiorPrice + rangePrice;
+    document.getElementById('summary-total').textContent = formatPrice(total);
+  }
+
+  function clearGroupActive(container, selector) {
+    container.querySelectorAll(selector).forEach(function(btn) {
+      btn.classList.remove('active');
+      btn.setAttribute('aria-checked', 'false');
+      var dot = btn.querySelector('span');
+      if (dot) dot.style.opacity = '0';
+    });
+  }
+
+  document.querySelectorAll('[data-color]').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var parent = btn.parentElement;
+      clearGroupActive(parent, '[data-color]');
+      btn.classList.add('active');
+      btn.setAttribute('aria-checked', 'true');
+      var dot = btn.querySelector('span');
+      if (dot) dot.style.opacity = '1';
+      document.getElementById('color-label').textContent = btn.dataset.label;
+      document.getElementById('summary-exterior').textContent = btn.dataset.label;
+    });
+  });
+
+  document.querySelectorAll('[data-wheel]').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var parent = btn.parentElement;
+      clearGroupActive(parent, '[data-wheel]');
+      btn.classList.add('active');
+      btn.setAttribute('aria-checked', 'true');
+      wheelPrice = parseInt(btn.dataset.price, 10) || 0;
+      document.getElementById('summary-wheels').textContent = btn.querySelector('p').textContent;
+      updateTotal();
+    });
+  });
+
+  document.querySelectorAll('[data-interior]').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var parent = btn.parentElement;
+      clearGroupActive(parent, '[data-interior]');
+      btn.classList.add('active');
+      btn.setAttribute('aria-checked', 'true');
+      interiorPrice = parseInt(btn.dataset.price, 10) || 0;
+      document.getElementById('summary-interior').textContent = btn.querySelector('p').textContent;
+      updateTotal();
+    });
+  });
+
+  var rangeToggle = document.getElementById('range-toggle');
+  var rangeKnob = document.getElementById('range-toggle-knob');
+  rangeToggle.addEventListener('click', function() {
+    rangeActive = !rangeActive;
+    rangeToggle.setAttribute('aria-checked', rangeActive ? 'true' : 'false');
+    if (rangeActive) {
+      rangeToggle.style.backgroundColor = '#C8FF00';
+      rangeToggle.style.borderColor = '#C8FF00';
+      rangeKnob.style.transform = 'translateX(24px)';
+      rangeKnob.style.backgroundColor = '#0A0A0A';
+      rangePrice = 38000;
+      document.getElementById('summary-range').textContent = 'Yes (+150 kWh)';
+    } else {
+      rangeToggle.style.backgroundColor = '#1E1E1E';
+      rangeToggle.style.borderColor = '#2A2A2A';
+      rangeKnob.style.transform = 'translateX(0)';
+      rangeKnob.style.backgroundColor = '#5A5A5A';
+      rangePrice = 0;
+      document.getElementById('summary-range').textContent = 'No';
+    }
+    updateTotal();
+  });
+
+  var reserveBtn = document.getElementById('reserve-btn');
+  var reserveFeedback = document.getElementById('reserve-feedback');
+  reserveBtn.addEventListener('click', function() {
+    reserveBtn.disabled = true;
+    reserveBtn.textContent = 'Processing...';
+    reserveBtn.style.opacity = '0.7';
+    setTimeout(function() {
+      reserveBtn.textContent = 'Reserved';
+      reserveBtn.style.opacity = '1';
+      reserveFeedback.textContent = 'Configuration saved. Reference: VLX1-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+      reserveFeedback.classList.remove('hidden');
+      setTimeout(function() {
+        reserveBtn.disabled = false;
+        reserveBtn.textContent = 'Reserve Configuration';
+      }, 3000);
+    }, 1200);
+  });
+
+  var mobileMenuBtn = document.getElementById('mobile-menu-btn');
+  var mobileMenu = document.getElementById('mobile-menu');
+  mobileMenuBtn.addEventListener('click', function() {
+    var expanded = mobileMenuBtn.getAttribute('aria-expanded') === 'true';
+    mobileMenuBtn.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+    mobileMenu.classList.toggle('hidden');
+  });
+
+  mobileMenu.querySelectorAll('a').forEach(function(link) {
+    link.addEventListener('click', function() {
+      mobileMenu.classList.add('hidden');
+      mobileMenuBtn.setAttribute('aria-expanded', 'false');
+    });
+  });
+
+  var revealElements = document.querySelectorAll('.scroll-reveal');
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+  revealElements.forEach(function(el) { observer.observe(el); });
+
+  var style = document.createElement('style');
+  style.textContent = '.config-option:focus-visible { outline: 2px solid #C8FF00; outline-offset: 2px; }';
+  document.head.appendChild(style);
+})();
+</script>
+</body>
+</html>

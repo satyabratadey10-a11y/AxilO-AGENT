@@ -1,0 +1,6 @@
+- Node.js syntax errors result in an exit status 1 and provide a specific caret (^) pointer to the location of the unclosed token.
+- Avoid AI-default dark themes: near-black + acid-green/vermilion is overused; chose cyan-electric (#00e5ff) as a distinctive, subject-grounded accent for an electric hypercar.
+- Typography carries personality: Space Grotesk + Inter is a deliberate pairing for a technical/automotive subject, not a generic fallback.
+- Spend boldness in one place: the animated SVG car silhouette with cyan energy lines is the signature element; surrounding sections remain disciplined and quiet.
+- Structure as information: numbered markers only used where order carries meaning (config steps); spec sections use descriptive labels instead of decorative numbering.
+- prefers-reduced-motion must disable all keyframe animations and transitions to meet accessibility CRITICAL priority.
