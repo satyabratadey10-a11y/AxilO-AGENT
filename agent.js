@@ -14,11 +14,25 @@ const { exec, execSync } = require('child_process');
 const BASE_DIR = __dirname;
 const SESSIONS_DIR = path.join(BASE_DIR, 'sessions');
 const MODELS_FILE = path.join(BASE_DIR, 'models.json');
+const CONFIG_FILE = path.join(BASE_DIR, 'config.json');
 const MEMO_FILE = path.join(BASE_DIR, 'imp_memo.md');
 const SKILLS_DIR = path.join(BASE_DIR, 'skills');
 
 if (!fs.existsSync(SESSIONS_DIR)) fs.mkdirSync(SESSIONS_DIR, { recursive: true });
 if (!fs.existsSync(SKILLS_DIR)) fs.mkdirSync(SKILLS_DIR, { recursive: true });
+
+let agentConfig = { logoStyle: 'cyberpunk' };
+try {
+    if (fs.existsSync(CONFIG_FILE)) {
+        agentConfig = { ...agentConfig, ...JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8')) };
+    }
+} catch(e) {}
+
+function saveConfig() {
+    try {
+        fs.writeFileSync(CONFIG_FILE, JSON.stringify(agentConfig, null, 2));
+    } catch(e) {}
+}
 
 const tools = require(path.join(BASE_DIR, 'tools.js'));
 const api = require(path.join(BASE_DIR, 'connection.js'));
@@ -399,7 +413,56 @@ function loadSkill(skillName) {
     return null;
 }
 
-// Claude Code Header Banner
+// AxilO Distinctive Logo Signatures
+const LOGO_STYLES = {
+    cyberpunk: {
+        id: 'cyberpunk',
+        name: 'Cyberpunk 2077 (Neon Glitch Matrix)',
+        render: (meta1, meta2, meta3) => {
+            console.log(` ${C.cyan}◢◤${C.magenta}█▓▒░${C.cyan}◥◣${C.reset}   ${meta1}`);
+            console.log(` ${C.magenta}▌ ${C.cyan}⟨AX⟩${C.magenta} ▐${C.reset}   ${meta2}`);
+            console.log(` ${C.cyan}◥◣${C.magenta}░▒▓█${C.cyan}◢◤${C.reset}   ${meta3}`);
+        }
+    },
+    quantum: {
+        id: 'quantum',
+        name: 'Quantum Nexus (Hyper-Geometric Hex Crystal)',
+        render: (meta1, meta2, meta3) => {
+            console.log(` ${C.blue} ⬡ ⬢ ⬡${C.reset}     ${meta1}`);
+            console.log(` ${C.purple} ⬢ ❖ ⬢${C.reset}     ${meta2}`);
+            console.log(` ${C.blue} ⬡ ⬢ ⬡${C.reset}     ${meta3}`);
+        }
+    },
+    singularity: {
+        id: 'singularity',
+        name: 'Antigravity Singularity (Event Horizon / Celestial Orbit)',
+        render: (meta1, meta2, meta3) => {
+            console.log(` ${C.purple} ◬ ◢█◣ ◬${C.reset}   ${meta1}`);
+            console.log(` ${C.cyan}━╋━ ◈ ━╋━${C.reset}  ${meta2}`);
+            console.log(` ${C.purple} ▽ ◥█◤ ▽${C.reset}   ${meta3}`);
+        }
+    },
+    mecha: {
+        id: 'mecha',
+        name: 'Tactical Obsidian Mecha (Industrial Aegis Shield)',
+        render: (meta1, meta2, meta3) => {
+            console.log(` ${C.orange} ▞▀█▀▚${C.reset}      ${meta1}`);
+            console.log(` ${C.orange} ▌${C.yellow}▲█▲${C.orange}▐${C.reset}      ${meta2}`);
+            console.log(` ${C.orange} ▚▄█▄▞${C.reset}      ${meta3}`);
+        }
+    },
+    apex: {
+        id: 'apex',
+        name: 'Apex Kinetic Ligature (Angular Minimalist A-X Monogram)',
+        render: (meta1, meta2, meta3) => {
+            console.log(` ${C.green} ▲ ╱█╲ ▲${C.reset}   ${meta1}`);
+            console.log(` ${C.green} █  ╳  █${C.reset}   ${meta2}`);
+            console.log(` ${C.green} ▼ ╲█╱ ▼${C.reset}   ${meta3}`);
+        }
+    }
+};
+
+// AxilO Header Banner Renderer
 function renderHeaderBanner() {
     const termWidth = process.stdout.columns || 80;
     const dividerLen = Math.max(20, Math.min(termWidth - 2, 68));
@@ -413,10 +476,15 @@ function renderHeaderBanner() {
         endpointHost = activeModel.endpoint || 'API Gateway';
     }
 
+    const meta1 = `${C.bold}AxilO Code v2.5.0${C.reset} ${C.gray}· ${activeModel.id}${C.reset}`;
+    const meta2 = `${C.gray}${endpointHost} · ${process.cwd()}${C.reset}`;
+    const meta3 = `${C.dim}Welcome to AxilO! · /help for commands · /model to switch${C.reset}`;
+
+    const currentStyle = agentConfig.logoStyle || 'cyberpunk';
+    const logoRenderer = LOGO_STYLES[currentStyle]?.render || LOGO_STYLES.cyberpunk.render;
+
     console.log();
-    console.log(` ${C.coral}▐▛███▜▌${C.reset}   ${C.bold}AxilO Code v2.5.0${C.reset} ${C.gray}· ${activeModel.id}${C.reset}`);
-    console.log(` ${C.coral}▝▜█████▛▘${C.reset}  ${C.gray}${endpointHost} · ${process.cwd()}${C.reset}`);
-    console.log(` ${C.coral}  ▘▘ ▝▝${C.reset}    ${C.dim}Welcome to AxilO! · /help for commands · /model to switch${C.reset}`);
+    logoRenderer(meta1, meta2, meta3);
     console.log();
     console.log(`${C.darkGray}${divider}${C.reset}`);
 }
@@ -730,6 +798,7 @@ async function handleSlashCommand(input) {
         console.log(`  ${C.green}/tools${C.reset}                    List all available tools`);
         console.log(`  ${C.green}/tasks${C.reset} [list|logs <id>]    Manage background commands & tasks`);
         console.log(`  ${C.green}/clear${C.reset}                    Clear conversation context & screen`);
+        console.log(`  ${C.green}/logo${C.reset} [1-5|name]             Switch terminal header logo style (5 unique styles)`);
         console.log(`  ${C.green}/compact${C.reset}                  Compact conversation to save tokens`);
         console.log(`  ${C.green}/status${C.reset}                   Show session statistics and memory`);
         console.log(`  ${C.green}/exit${C.reset} | ${C.green}/quit${C.reset}             Exit AxilO\n`);
@@ -743,6 +812,41 @@ async function handleSlashCommand(input) {
         saveSession();
         console.clear();
         renderHeaderBanner();
+        return;
+    }
+
+    // 2.0 LOGO / STYLE SWITCHER: /logo [1-5 | name]
+    if (command === '/logo' || command === '/style') {
+        const styleKeys = Object.keys(LOGO_STYLES);
+        if (!args) {
+            console.log(`\n${C.bold}Distinctive AxilO Logo Signatures:${C.reset}`);
+            styleKeys.forEach((k, idx) => {
+                const isAct = (agentConfig.logoStyle === k);
+                const marker = isAct ? ` ${C.green}● (active)${C.reset}` : ` ${C.gray}○${C.reset}`;
+                console.log(`  [${idx + 1}] ${C.cyan}${k.toUpperCase().padEnd(12)}${C.reset} · ${LOGO_STYLES[k].name}${marker}`);
+            });
+            console.log(`\n${C.gray}Switch logo style with: ${C.green}/logo <1-5|name>${C.reset}\n`);
+            return;
+        }
+
+        const inputStyle = args.trim().toLowerCase();
+        let selectedKey = null;
+
+        const num = parseInt(inputStyle, 10);
+        if (!isNaN(num) && num >= 1 && num <= styleKeys.length) {
+            selectedKey = styleKeys[num - 1];
+        } else {
+            selectedKey = styleKeys.find(k => k === inputStyle || LOGO_STYLES[k].name.toLowerCase().includes(inputStyle));
+        }
+
+        if (selectedKey) {
+            agentConfig.logoStyle = selectedKey;
+            saveConfig();
+            console.log(`\n${C.green}✔ Active logo set to: ${C.bold}${LOGO_STYLES[selectedKey].name}${C.reset}\n`);
+            renderHeaderBanner();
+        } else {
+            console.log(`\n${C.red}Unknown logo style: "${args}". Valid options: ${styleKeys.join(', ')} or 1-${styleKeys.length}.${C.reset}\n`);
+        }
         return;
     }
 

@@ -3,10 +3,9 @@
 An elite, autonomous terminal-first AI agent and reverse-engineering orchestrator engineered for Linux and Android Termux (`aarch64`). AxilO matches Claude Code visual aesthetics with a real-time animated TUI, continuous streaming reasoning, dual-mode command execution, multi-model shared session memory, and native Google Colab GPU acceleration.
 
 ```
-           AxilO Code v2.5.0
- ▐▛███▜▌   gpt-5.6-sol · agentrouter.org
- ▝▜█████▛▘  /data/data/com.termux/files/home
-   ▘▘ ▝▝    Welcome to AxilO! · /help for commands · /model to switch
+ ◢◤█▓▒░◥◣   AxilO Code v2.5.0 · gpt-5.6-sol
+ ▌ ⟨AX⟩ ▐   agentrouter.org · /data/data/com.termux/files/home
+ ◥◣░▒▓█◢◤   Welcome to AxilO! · /help for commands · /model to switch
 ```
 
 ---
@@ -92,6 +91,7 @@ Inside the running AxilO CLI, use slash commands to manage models, sessions, tas
 | `/rea <apk_path> <prompt>` | Launch Reverse Engineering workflow directly against a target APK or binary. |
 | `/noskill` | Clear active skill guidelines and restore standard terminal assistant mode. |
 | `/tools` | List all registered native tools with their schemas. |
+| `/logo [1-5]` | Switch between 5 distinctive terminal logo styles (Cyberpunk, Quantum, Singularity, Mecha, Apex). |
 | `/compact` | Compact conversational history using autonomous summarization to save tokens. |
 | `/clear` | Clear the current conversation history and terminal screen. |
 | `/status` | View system resource usage, memory footprint, and Node runtime statistics. |
