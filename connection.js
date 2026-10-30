@@ -61,6 +61,236 @@ async function callAI({ activeModel, chatHistory = [], promptText, SYSTEM_PROMPT
     const cappedTools = capTools(tools, 128);
 
     // =========================================================================
+    // 0. OPENAI RESPONSES API PATHWAY (GPT-5.6 Sol & AgentRouter Responses API)
+    // =========================================================================
+    const isResponsesApi = provider === 'responses' || activeModel.api === 'responses' ||
+        ((provider === 'agentrouter' || endpoint.includes('agentrouter.org')) && (activeModel.id.includes('gpt-5') || activeModel.id.includes('sol') || activeModel.id.includes('responses')));
+
+    if (isResponsesApi) {
+        let baseUrl = endpoint.replace(/\/v1\/.*$/, '').replace(/\/+$/, '');
+        if (!baseUrl) baseUrl = 'https://agentrouter.org';
+        const url = `${baseUrl}/v1/responses`;
+
+        const headers = {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${activeModel.apiKey}`,
+            'user-agent': 'claude-cli/2.1.112 (external, sdk-cli)',
+            'x-app': 'cli',
+            'x-claude-code-session-id': generateUUID(),
+            'anthropic-dangerous-direct-browser-access': 'true',
+            'x-stainless-arch': 'arm64',
+            'x-stainless-lang': 'js',
+            'x-stainless-os': 'Android',
+            'x-stainless-package-version': '0.81.0',
+            'x-stainless-runtime': 'node',
+            'x-stainless-runtime-version': 'v26.2.0',
+            'x-stainless-timeout': '600'
+        };
+
+        if (activeModel.stream) {
+            headers['Accept'] = 'text/event-stream';
+        }
+
+        const input = [];
+        for (const msg of fullHistory) {
+            if (msg.role === 'system') continue;
+
+            if (msg.role === 'tool') {
+                input.push({
+                    type: 'function_call_output',
+                    call_id: msg.tool_call_id,
+                    output: typeof msg.content === 'string' ? msg.content : JSON.stringify(msg.content)
+                });
+                continue;
+            }
+
+            if (msg.tool_calls && Array.isArray(msg.tool_calls)) {
+                if (msg.content) {
+                    input.push({
+                        role: 'assistant',
+                        content: typeof msg.content === 'string' ? msg.content : JSON.stringify(msg.content)
+                    });
+                }
+                for (const tc of msg.tool_calls) {
+                    input.push({
+                        type: 'function_call',
+                        call_id: tc.id || tc.call_id,
+                        name: tc.name,
+                        arguments: typeof tc.args === 'string' ? tc.args : JSON.stringify(tc.args || {})
+                    });
+                }
+                continue;
+            }
+
+            input.push({
+                role: (msg.role === 'assistant' || msg.role === 'ai') ? 'assistant' : 'user',
+                content: typeof msg.content === 'string' ? msg.content : JSON.stringify(msg.content)
+            });
+        }
+
+        const responsesTools = cappedTools.map(t => ({
+            type: 'function',
+            name: t.name,
+            description: t.description || '',
+            parameters: t.parameters || { type: 'object', properties: {} }
+        }));
+
+        const body = {
+            model: activeModel.id,
+            input: input.length > 0 ? input : [{ role: 'user', content: 'Hello' }],
+            stream: !!activeModel.stream
+        };
+
+        if (SYSTEM_PROMPT) {
+            body.instructions = SYSTEM_PROMPT;
+        }
+
+        if (responsesTools.length > 0) {
+            body.tools = responsesTools;
+        }
+
+        const response = await fetch(url, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify(body),
+            signal
+        });
+
+        if (!response.ok) {
+            const errText = await response.text();
+            throw new Error(`Responses API ${response.status}: ${errText}`);
+        }
+
+        if (activeModel.stream && response.body) {
+            let fullText = '';
+            const toolCalls = [];
+            const activeCallsMap = new Map();
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let buffer = '';
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                buffer += decoder.decode(value, { stream: true });
+                const lines = buffer.split('\n');
+                buffer = lines.pop();
+
+                for (const line of lines) {
+                    const cleanLine = line.trim();
+                    if (!cleanLine.startsWith('data:')) continue;
+                    const rawData = cleanLine.slice(5).trim();
+                    if (rawData === '[DONE]') continue;
+
+                    try {
+                        const parsed = JSON.parse(rawData);
+
+                        // 1. Text delta
+                        if (parsed.type === 'response.output_text.delta' && parsed.delta) {
+                            fullText += parsed.delta;
+                            if (onToken) onToken(parsed.delta, false);
+                        }
+
+                        // 2. Function call start
+                        if (parsed.type === 'response.output_item.added' && parsed.item?.type === 'function_call') {
+                            const item = parsed.item;
+                            activeCallsMap.set(item.id, {
+                                id: item.call_id || item.id,
+                                name: item.name,
+                                argsRaw: ''
+                            });
+                        }
+
+                        // 3. Function call argument delta
+                        if (parsed.type === 'response.function_call_arguments.delta') {
+                            const entry = activeCallsMap.get(parsed.item_id);
+                            if (entry) {
+                                entry.argsRaw += (parsed.delta || '');
+                            }
+                        }
+
+                        // 4. Function call completion
+                        if (parsed.type === 'response.function_call_arguments.done' || (parsed.type === 'response.output_item.done' && parsed.item?.type === 'function_call')) {
+                            const item = parsed.item || activeCallsMap.get(parsed.item_id);
+                            if (item) {
+                                const rawArgs = parsed.arguments || item.argsRaw || item.arguments || '{}';
+                                let parsedArgs = {};
+                                try {
+                                    parsedArgs = JSON.parse(rawArgs);
+                                } catch (e) {
+                                    parsedArgs = { raw: rawArgs };
+                                }
+                                const callId = item.call_id || item.id || parsed.item_id;
+                                if (!toolCalls.some(c => c.id === callId)) {
+                                    toolCalls.push({
+                                        id: callId,
+                                        name: item.name,
+                                        args: parsedArgs
+                                    });
+                                }
+                            }
+                        }
+
+                        // 5. Overall response completion check
+                        if (parsed.type === 'response.completed' && parsed.response?.output) {
+                            for (const o of parsed.response.output) {
+                                if (o.type === 'function_call') {
+                                    const callId = o.call_id || o.id;
+                                    if (!toolCalls.some(c => c.id === callId)) {
+                                        let parsedArgs = {};
+                                        try {
+                                            parsedArgs = JSON.parse(o.arguments || '{}');
+                                        } catch (e) {
+                                            parsedArgs = { raw: o.arguments };
+                                        }
+                                        toolCalls.push({
+                                            id: callId,
+                                            name: o.name,
+                                            args: parsedArgs
+                                        });
+                                    }
+                                }
+                            }
+                        }
+                    } catch (e) {}
+                }
+            }
+
+            return { text: fullText, toolCalls, raw: null };
+        } else {
+            const json = await response.json();
+            let fullText = '';
+            const toolCalls = [];
+
+            if (json.output && Array.isArray(json.output)) {
+                for (const item of json.output) {
+                    if (item.type === 'message' && Array.isArray(item.content)) {
+                        for (const c of item.content) {
+                            if (c.type === 'output_text' && c.text) fullText += c.text;
+                        }
+                    } else if (item.type === 'function_call') {
+                        let parsedArgs = {};
+                        try {
+                            parsedArgs = JSON.parse(item.arguments || '{}');
+                        } catch (e) {
+                            parsedArgs = { raw: item.arguments };
+                        }
+                        toolCalls.push({
+                            id: item.call_id || item.id,
+                            name: item.name,
+                            args: parsedArgs
+                        });
+                    }
+                }
+            }
+
+            if (onToken && fullText) onToken(fullText, false);
+            return { text: fullText, toolCalls, raw: json };
+        }
+    }
+
+    // =========================================================================
     // 1. AGENTROUTER & ANTHROPIC NATIVE PATHWAY (MESSAGES API)
     // =========================================================================
     if (provider === 'agentrouter' || provider === 'anthropic') {
@@ -456,7 +686,7 @@ async function callAI({ activeModel, chatHistory = [], promptText, SYSTEM_PROMPT
         let baseEndpoint = endpoint.split('/v1beta')[0].replace(/\/+$/, '');
         if (!baseEndpoint.startsWith('http')) baseEndpoint = 'https://generativelanguage.googleapis.com';
 
-        const action = activeModel.stream ? 'streamGenerateContent' : 'generateContent';
+        const action = activeModel.stream ? 'streamGenerateContent?alt=sse' : 'generateContent';
         const url = `${baseEndpoint}/v1beta/models/${activeModel.id}:${action}`;
 
         const contents = fullHistory.map(msg => ({

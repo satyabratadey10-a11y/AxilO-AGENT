@@ -650,7 +650,13 @@ async function runAgent(promptText) {
 
             // Execute each tool call
             for (const call of toolCalls) {
-                const argPreview = Object.entries(call.args || {})
+                let callArgs = call.args;
+                if (typeof callArgs === 'string') {
+                    try { callArgs = JSON.parse(callArgs); } catch(e) { callArgs = { raw: callArgs }; }
+                }
+                call.args = callArgs || {};
+
+                const argPreview = Object.entries(call.args)
                     .map(([k, v]) => `${k}: ${JSON.stringify(v)}`)
                     .join(', ');
                 const truncatedArgs = argPreview.length > 60 ? argPreview.substring(0, 57) + '...' : argPreview;

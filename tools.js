@@ -354,7 +354,7 @@ async function executeTool(rawToolName, rawArgs) {
 
         // 4. READ FILE
         if (toolName === 'read_file') {
-            const filePath = path.resolve(process.cwd(), args.path);
+            const filePath = path.resolve(process.cwd(), args.path || args.file_path || '');
             if (!fsSync.existsSync(filePath)) return `Error: File not found: ${filePath}`;
             const raw = await fs.readFile(filePath, 'utf8');
             if (args.start_line !== undefined || args.end_line !== undefined) {
@@ -372,7 +372,7 @@ async function executeTool(rawToolName, rawArgs) {
 
         // 5. WRITE FILE
         if (toolName === 'write_file') {
-            const filePath = path.resolve(process.cwd(), args.path);
+            const filePath = path.resolve(process.cwd(), args.path || args.file_path || '');
             await fs.mkdir(path.dirname(filePath), { recursive: true });
             if (args.append) {
                 await fs.appendFile(filePath, args.content, 'utf8');
@@ -385,7 +385,7 @@ async function executeTool(rawToolName, rawArgs) {
 
         // 6. PATCH FILE
         if (toolName === 'patch_file') {
-            const filePath = path.resolve(process.cwd(), args.file_path);
+            const filePath = path.resolve(process.cwd(), args.file_path || args.path || '');
             if (!fsSync.existsSync(filePath)) return `Error: File not found: ${filePath}`;
             let content = await fs.readFile(filePath, 'utf8');
             if (!content.includes(args.search_text)) {
