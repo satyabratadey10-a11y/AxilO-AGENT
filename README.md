@@ -12,9 +12,13 @@ An elite, autonomous terminal-first AI agent and reverse-engineering orchestrato
 
 ## 🌟 Key Highlights
 
+- **Interactive Slash Command Stack Menu**: Typing `/` immediately pops up an animated, stacked command palette matching Claude Code and Antigravity CLI. Navigate seamlessly with **Up/Down arrow keys (↑ / ↓)**, browse long lists with windowed vertical scrolling (`▲` / `▼`), autocomplete with **Tab**, or execute directly on **Enter**.
+- **Always-Active Full-Duplex Keyboard**: You can continue typing prompts, running slash commands, or queuing follow-up tasks **while the AI is actively generating or executing tools**. Queued prompts execute sequentially without interrupting generation.
+- **Instant `Esc` Interruption**: Hit `Escape` (`Esc`) at any time to immediately abort active AI generation or long-running tool calls and cleanly return to the prompt.
+- **1 Billion Token Context Ceiling**: AxilO's internal session context and message memory limits are raised to **1,000,000,000 tokens (1 Billion)**, preventing artificial truncation, message pruning, or mid-sentence generation cutoffs.
+- **Unlimited Autonomous Turns**: Removed artificial turn ceilings (previously stopping after 25 tool calls), enabling continuous multi-turn autonomous execution until the task is complete.
 - **Dedicated Session Directories & Shared Memory**: Every session gets an isolated directory in `~/.axilo/sessions/session_<timestamp>_<id>/` with `memory.json` (conversational history) and `session.json` (metadata). Switching models mid-session via `/model <id>` retains complete shared context seamlessly.
 - **Google Colab Tesla T4 GPU Acceleration**: Run local state-of-the-art models (Qwen 3.5 9B / Qwen 3.8) for free on 16GB Tesla T4 GPUs with Flash Attention (`OLLAMA_FLASH_ATTENTION=1`), 24h keep-alive, and self-healing Cloudflare Tunnels maintained by `colab_daemon.py`.
-- **Maximized Context Window (32,768 Tokens)**: Eliminates the default 2,048 token limit that previously caused mid-sentence generation cutoffs. Fully backed by a 32K KV cache and Flash Attention on Tesla T4 VRAM, enabling uninterrupted multi-turn code analysis and large APK decompilations.
 - **1-Command Auto-Boot Runners**: Start and configure the Colab GPU environment in one command using any runtime: `python run_qwen.py`, `bash run_qwen.sh`, or `node run_qwen.js`.
 - **Dual-Mode Command Execution**:
   - **Synchronous**: Fast execution with real-time spinner, duration timer, and output snippets.

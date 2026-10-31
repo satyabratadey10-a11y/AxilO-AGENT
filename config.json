@@ -1,3 +1,4 @@
 {
-  "logoStyle": "cyberpunk"
+  "logoStyle": "cyberpunk",
+  "contextLimit": 1000000000
 }

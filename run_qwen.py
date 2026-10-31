@@ -28,7 +28,7 @@ DAEMON_SCRIPT = os.path.join(AXILO_DIR, "colab_daemon.py")
 DAEMON_LOG = os.path.join(AXILO_DIR, "daemon.log")
 HEARTBEAT_FILE = os.path.join(AXILO_DIR, "heartbeat.py")
 SESSION_NAME = "qwen-t4"
-DEFAULT_CONTEXT = 32768
+DEFAULT_CONTEXT = 1000000000
 
 # ANSI colors
 CYAN = "\033[96m"
@@ -114,8 +114,9 @@ def update_models_json(endpoint, context_tokens=DEFAULT_CONTEXT):
             if "qwen" in m.get("id", "").lower() and "colab" in m.get("name", "").lower():
                 m["endpoint"] = endpoint
                 m["contextTokens"] = context_tokens
-                m["maxTokens"] = 8192
-                m["options"] = {"num_ctx": context_tokens}
+                m["contextLimit"] = 1000000000
+                m["maxTokens"] = 16384
+                m["options"] = {"num_ctx": 32768}
                 updated_count += 1
                 
         with open(MODELS_FILE, "w") as f:

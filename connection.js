@@ -378,7 +378,7 @@ async function callAI({ activeModel, chatHistory = [], promptText, SYSTEM_PROMPT
 
         const body = {
             model: activeModel.id,
-            max_tokens: activeModel.maxTokens || 4096,
+            max_tokens: activeModel.maxTokens || 16384,
             messages: anthropicMessages,
             system: SYSTEM_PROMPT || "You are AxilO, a senior autonomous AI assistant.",
             stream: !!activeModel.stream
@@ -562,7 +562,7 @@ async function callAI({ activeModel, chatHistory = [], promptText, SYSTEM_PROMPT
             model: activeModel.id,
             messages,
             temperature: activeModel.temperature !== undefined ? activeModel.temperature : 0.3,
-            max_tokens: activeModel.maxTokens || 4096,
+            max_tokens: activeModel.maxTokens || 16384,
             stream: !!activeModel.stream
         };
 

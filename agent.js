@@ -21,7 +21,7 @@ const SKILLS_DIR = path.join(BASE_DIR, 'skills');
 if (!fs.existsSync(SESSIONS_DIR)) fs.mkdirSync(SESSIONS_DIR, { recursive: true });
 if (!fs.existsSync(SKILLS_DIR)) fs.mkdirSync(SKILLS_DIR, { recursive: true });
 
-let agentConfig = { logoStyle: 'cyberpunk' };
+let agentConfig = { logoStyle: 'cyberpunk', contextLimit: 1000000000 };
 try {
     if (fs.existsSync(CONFIG_FILE)) {
         agentConfig = { ...agentConfig, ...JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8')) };
@@ -146,7 +146,7 @@ function loadModels() {
             name: 'GPT-5.6 Sol (AgentRouter)',
             id: 'gpt-5.6-sol',
             endpoint: 'https://agentrouter.org',
-            apiKey: 'sk-xz0htv16oEc2XjwyYcd699XvyJ3IFtGXeUo5XTUk079H5Z5B',
+            apiKey: process.env.AGENTROUTER_API_KEY || process.env.API_KEY || '',
             provider: 'agentrouter',
             temperature: 0.3,
             maxTokens: 4096,
@@ -495,12 +495,494 @@ function renderDivider() {
     console.log(`${C.darkGray}${divider}${C.reset}`);
 }
 
-// Readline UI Setup
-const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-    prompt: `${C.bold}${C.green}❯ ${C.reset}`
-});
+// Readline UI Setup & Interactive Keypress Engine
+const COMMAND_DEFINITIONS = [
+    { name: '/help', desc: 'Display all available commands and help' },
+    { name: '/model', desc: 'Switch or view active model (retains memory)', args: '[id]' },
+    { name: '/models', desc: 'List all configured models' },
+    { name: '/session', desc: 'Manage dedicated session directories & memories', args: '[info|list|switch|new]' },
+    { name: '/endpoint', desc: 'View or set API endpoint URL', args: '[url]' },
+    { name: '/key', desc: 'View or set API Key', args: '[key]' },
+    { name: '/config', desc: 'Display current configuration & context limit' },
+    { name: '/add-model', desc: 'Launch interactive model setup wizard' },
+    { name: '/del-model', desc: 'Delete a configured model' },
+    { name: '/skills', desc: 'List all installed skills' },
+    { name: '/noskill', desc: 'Clear active skill guidelines' },
+    { name: '/tools', desc: 'List all available agent tools' },
+    { name: '/tasks', desc: 'Manage background commands & tasks', args: '[list|logs|kill]' },
+    { name: '/clear', desc: 'Clear conversation context & screen' },
+    { name: '/logo', desc: 'Switch terminal header logo style (5 unique styles)', args: '[1-5|name]' },
+    { name: '/compact', desc: 'Compact conversation to save tokens' },
+    { name: '/status', desc: 'Show session statistics, context limit & memory' },
+    { name: '/rea', desc: 'Launch Reverse Engineering workflow directly', args: '[target] [prompt]' },
+    { name: '/exit', desc: 'Exit AxilO' },
+    { name: '/quit', desc: 'Exit AxilO' },
+];
+
+function getAllSlashCommands() {
+    const commands = [...COMMAND_DEFINITIONS];
+    try {
+        const skills = getAvailableSkills();
+        for (const s of skills) {
+            const skillCmd = `/${s.name}`;
+            if (!commands.some(c => c.name === skillCmd)) {
+                commands.push({
+                    name: skillCmd,
+                    desc: `Execute task with ${s.name} skill instructions`,
+                    args: '[prompt]'
+                });
+            }
+        }
+    } catch(e) {}
+    return commands;
+}
+
+function getFilteredCommands(buffer) {
+    if (!buffer.startsWith('/')) return [];
+    const firstWord = buffer.split(' ')[0].toLowerCase();
+    const query = firstWord.slice(1);
+    const all = getAllSlashCommands();
+
+    if (!query) {
+        return all;
+    }
+
+    const prefixMatches = [];
+    const subMatches = [];
+
+    for (const cmd of all) {
+        const cmdNameWithoutSlash = cmd.name.slice(1).toLowerCase();
+        if (cmdNameWithoutSlash.startsWith(query)) {
+            prefixMatches.push(cmd);
+        } else if (cmdNameWithoutSlash.includes(query)) {
+            subMatches.push(cmd);
+        }
+    }
+    if (prefixMatches.length + subMatches.length > 0) {
+        return [...prefixMatches, ...subMatches];
+    }
+    for (const cmd of all) {
+        if (cmd.desc && cmd.desc.toLowerCase().includes(query)) {
+            subMatches.push(cmd);
+        }
+    }
+    return subMatches;
+}
+
+// Engine State
+let inputBuffer = '';
+let cursorPos = 0;
+let isMenuOpen = false;
+let currentMatches = [];
+let menuSelectedIdx = 0;
+let menuScrollOffset = 0;
+let lastRenderedMenuLines = 0;
+let activeProcessingInput = '';
+const pendingInputQueue = [];
+const commandHistory = [];
+let historyIdx = -1;
+let historyDraft = '';
+let lastEscTime = 0;
+
+const PROMPT_STR = `${C.bold}${C.green}❯ ${C.reset}`;
+const PROMPT_WIDTH = 2;
+
+function clearPreviousMenu() {
+    if (lastRenderedMenuLines > 0) {
+        for (let i = 0; i < lastRenderedMenuLines; i++) {
+            process.stdout.write('\n\x1b[2K');
+        }
+        process.stdout.write(`\x1b[${lastRenderedMenuLines}A`);
+        lastRenderedMenuLines = 0;
+    }
+}
+
+function renderPromptLine() {
+    process.stdout.write('\r\x1b[2K');
+    process.stdout.write(PROMPT_STR + inputBuffer);
+    readline.cursorTo(process.stdout, PROMPT_WIDTH + cursorPos);
+}
+
+function renderSlashMenu() {
+    clearPreviousMenu();
+    renderPromptLine();
+
+    if (!isMenuOpen || currentMatches.length === 0) {
+        return;
+    }
+
+    const termWidth = process.stdout.columns || 80;
+    const maxVisible = Math.max(3, Math.min(6, (process.stdout.rows || 24) - 6));
+
+    if (menuSelectedIdx < menuScrollOffset) {
+        menuScrollOffset = menuSelectedIdx;
+    } else if (menuSelectedIdx >= menuScrollOffset + maxVisible) {
+        menuScrollOffset = menuSelectedIdx - maxVisible + 1;
+    }
+    if (menuScrollOffset > currentMatches.length - maxVisible) {
+        menuScrollOffset = Math.max(0, currentMatches.length - maxVisible);
+    }
+    if (menuScrollOffset < 0) menuScrollOffset = 0;
+
+    let linesPrinted = 0;
+
+    if (menuScrollOffset > 0) {
+        process.stdout.write(`\n\x1b[2K  ${C.darkGray}▲ (${menuScrollOffset} more commands above, press ↑)${C.reset}`);
+        linesPrinted++;
+    }
+
+    const visible = currentMatches.slice(menuScrollOffset, menuScrollOffset + maxVisible);
+    for (let i = 0; i < visible.length; i++) {
+        const item = visible[i];
+        const actualIdx = menuScrollOffset + i;
+        const isSelected = (actualIdx === menuSelectedIdx);
+
+        const rawCmdPart = item.args ? `${item.name} ${item.args}` : item.name;
+        const padLen = Math.max(1, 26 - rawCmdPart.length);
+        const padding = ' '.repeat(padLen);
+        const descPart = item.desc || '';
+
+        let lineText = '';
+        if (isSelected) {
+            lineText = `  ${C.cyan}${C.bold}❯ ${item.name}${C.reset}${item.args ? ' ' + C.dim + item.args + C.reset : ''}${padding}${C.white}${descPart}${C.reset}`;
+        } else {
+            lineText = `    ${C.green}${item.name}${C.reset}${item.args ? ' ' + C.dim + item.args + C.reset : ''}${padding}${C.gray}${descPart}${C.reset}`;
+        }
+
+        process.stdout.write(`\n\x1b[2K${lineText}`);
+        linesPrinted++;
+    }
+
+    const remainingBelow = currentMatches.length - (menuScrollOffset + maxVisible);
+    if (remainingBelow > 0) {
+        process.stdout.write(`\n\x1b[2K  ${C.darkGray}▼ (${remainingBelow} more below, press ↓ to scroll)${C.reset}`);
+        linesPrinted++;
+    }
+
+    lastRenderedMenuLines = linesPrinted;
+
+    if (linesPrinted > 0) {
+        process.stdout.write(`\x1b[${linesPrinted}A`);
+        readline.cursorTo(process.stdout, PROMPT_WIDTH + cursorPos);
+    }
+}
+
+function prompt() {
+    inputBuffer = '';
+    cursorPos = 0;
+    isMenuOpen = false;
+    currentMatches = [];
+    menuSelectedIdx = 0;
+    menuScrollOffset = 0;
+    lastRenderedMenuLines = 0;
+    historyIdx = -1;
+    historyDraft = '';
+    renderPromptLine();
+}
+
+async function drainQueueOrPrompt() {
+    if (pendingInputQueue.length > 0) {
+        const nextInput = pendingInputQueue.shift();
+        console.log(`\n${C.bold}${C.green}❯ ${nextInput}${C.reset}`);
+        if (nextInput.startsWith('/')) {
+            await handleSlashCommand(nextInput);
+            if (!isProcessing) await drainQueueOrPrompt();
+        } else {
+            await runAgent(nextInput);
+        }
+    } else {
+        prompt();
+    }
+}
+
+function handleEscapeKey() {
+    const now = Date.now();
+    if (now - lastEscTime < 80) return;
+    lastEscTime = now;
+
+    if (isProcessing) {
+        if (currentAbortController) {
+            currentAbortController.abort();
+            spinner.stop(true);
+            process.stdout.write(`\n${C.yellow}⚠ Operation cancelled by user (Esc key).${C.reset}\n`);
+            activeProcessingInput = '';
+        }
+        return;
+    }
+
+    if (isMenuOpen) {
+        isMenuOpen = false;
+        clearPreviousMenu();
+        renderPromptLine();
+        return;
+    }
+
+    if (inputBuffer.length > 0) {
+        clearPreviousMenu();
+        inputBuffer = '';
+        cursorPos = 0;
+        renderPromptLine();
+    }
+}
+
+function updateMenuStateAfterTyping() {
+    if (inputBuffer.startsWith('/')) {
+        const parts = inputBuffer.split(' ');
+        if (parts.length === 1) {
+            currentMatches = getFilteredCommands(inputBuffer);
+            isMenuOpen = currentMatches.length > 0;
+            if (menuSelectedIdx >= currentMatches.length) menuSelectedIdx = 0;
+        } else {
+            isMenuOpen = false;
+        }
+    } else {
+        isMenuOpen = false;
+    }
+}
+
+async function onKeyPress(str, key) {
+    if (!key) return;
+
+    // 1. Esc Key
+    if (key.name === 'escape') {
+        handleEscapeKey();
+        return;
+    }
+
+    // 2. While Processing (AI generating or executing tools)
+    if (isProcessing) {
+        if (key.name === 'return' || key.name === 'enter') {
+            if (activeProcessingInput.trim().length > 0) {
+                const q = activeProcessingInput.trim();
+                pendingInputQueue.push(q);
+                process.stdout.write(`\n${C.dim}[Queued next prompt: "${q}"]${C.reset}\n`);
+                activeProcessingInput = '';
+            }
+            return;
+        }
+        if (key.name === 'backspace') {
+            if (activeProcessingInput.length > 0) {
+                activeProcessingInput = activeProcessingInput.slice(0, -1);
+            }
+            return;
+        }
+        if (key.ctrl && key.name === 'c') {
+            if (currentAbortController) {
+                currentAbortController.abort();
+                spinner.stop(true);
+                process.stdout.write(`\n${C.yellow}⚠ Operation cancelled by user (Ctrl+C).${C.reset}\n`);
+                activeProcessingInput = '';
+            }
+            return;
+        }
+        if (str && str.length === 1 && !key.ctrl && !key.meta) {
+            activeProcessingInput += str;
+        }
+        return;
+    }
+
+    // 3. Normal Idle Prompt Interaction
+    // Ctrl+C
+    if (key.ctrl && key.name === 'c') {
+        if (inputBuffer.length > 0) {
+            clearPreviousMenu();
+            inputBuffer = '';
+            cursorPos = 0;
+            renderPromptLine();
+        } else {
+            clearPreviousMenu();
+            console.log(`\n${C.gray}Goodbye!${C.reset}`);
+            process.exit(0);
+        }
+        return;
+    }
+
+    // Ctrl+D
+    if (key.ctrl && key.name === 'd') {
+        if (inputBuffer.length === 0) {
+            clearPreviousMenu();
+            console.log(`\n${C.gray}Goodbye!${C.reset}`);
+            process.exit(0);
+        }
+        return;
+    }
+
+    // Up Arrow
+    if (key.name === 'up') {
+        if (isMenuOpen && currentMatches.length > 0) {
+            menuSelectedIdx = (menuSelectedIdx - 1 + currentMatches.length) % currentMatches.length;
+            renderSlashMenu();
+        } else if (commandHistory.length > 0) {
+            if (historyIdx === -1) {
+                historyDraft = inputBuffer;
+                historyIdx = commandHistory.length - 1;
+            } else if (historyIdx > 0) {
+                historyIdx--;
+            }
+            inputBuffer = commandHistory[historyIdx];
+            cursorPos = inputBuffer.length;
+            updateMenuStateAfterTyping();
+            renderSlashMenu();
+        }
+        return;
+    }
+
+    // Down Arrow
+    if (key.name === 'down') {
+        if (isMenuOpen && currentMatches.length > 0) {
+            menuSelectedIdx = (menuSelectedIdx + 1) % currentMatches.length;
+            renderSlashMenu();
+        } else if (historyIdx !== -1) {
+            if (historyIdx < commandHistory.length - 1) {
+                historyIdx++;
+                inputBuffer = commandHistory[historyIdx];
+            } else {
+                historyIdx = -1;
+                inputBuffer = historyDraft;
+            }
+            cursorPos = inputBuffer.length;
+            updateMenuStateAfterTyping();
+            renderSlashMenu();
+        }
+        return;
+    }
+
+    // Left Arrow
+    if (key.name === 'left') {
+        if (cursorPos > 0) {
+            cursorPos--;
+            renderSlashMenu();
+        }
+        return;
+    }
+
+    // Right Arrow
+    if (key.name === 'right') {
+        if (cursorPos < inputBuffer.length) {
+            cursorPos++;
+            renderSlashMenu();
+        }
+        return;
+    }
+
+    // Home / Ctrl+A
+    if (key.name === 'home' || (key.ctrl && key.name === 'a')) {
+        cursorPos = 0;
+        renderSlashMenu();
+        return;
+    }
+
+    // End / Ctrl+E
+    if (key.name === 'end' || (key.ctrl && key.name === 'e')) {
+        cursorPos = inputBuffer.length;
+        renderSlashMenu();
+        return;
+    }
+
+    // Backspace
+    if (key.name === 'backspace') {
+        if (cursorPos > 0) {
+            inputBuffer = inputBuffer.slice(0, cursorPos - 1) + inputBuffer.slice(cursorPos);
+            cursorPos--;
+            updateMenuStateAfterTyping();
+            renderSlashMenu();
+        }
+        return;
+    }
+
+    // Delete
+    if (key.name === 'delete') {
+        if (cursorPos < inputBuffer.length) {
+            inputBuffer = inputBuffer.slice(0, cursorPos) + inputBuffer.slice(cursorPos + 1);
+            updateMenuStateAfterTyping();
+            renderSlashMenu();
+        }
+        return;
+    }
+
+    // Tab (autocomplete highlighted slash command)
+    if (key.name === 'tab') {
+        if (isMenuOpen && currentMatches.length > 0) {
+            const chosen = currentMatches[menuSelectedIdx];
+            if (chosen) {
+                inputBuffer = chosen.name + ' ';
+                cursorPos = inputBuffer.length;
+                isMenuOpen = false;
+                clearPreviousMenu();
+                renderPromptLine();
+            }
+        }
+        return;
+    }
+
+    // Enter
+    if (key.name === 'return' || key.name === 'enter') {
+        if (isMenuOpen && currentMatches.length > 0) {
+            const chosen = currentMatches[menuSelectedIdx];
+            clearPreviousMenu();
+            process.stdout.write('\n');
+            const cmd = chosen.name;
+            inputBuffer = '';
+            cursorPos = 0;
+            isMenuOpen = false;
+            commandHistory.push(cmd);
+            await handleSlashCommand(cmd);
+            if (!isProcessing) await drainQueueOrPrompt();
+            return;
+        }
+
+        clearPreviousMenu();
+        process.stdout.write('\n');
+        const submitted = inputBuffer.trim();
+        inputBuffer = '';
+        cursorPos = 0;
+        isMenuOpen = false;
+
+        if (!submitted) {
+            prompt();
+            return;
+        }
+
+        commandHistory.push(submitted);
+        if (submitted.startsWith('/')) {
+            await handleSlashCommand(submitted);
+            if (!isProcessing) await drainQueueOrPrompt();
+        } else {
+            await runAgent(submitted);
+        }
+        return;
+    }
+
+    // Printable character insertion
+    if (str && str.length === 1 && !key.ctrl && !key.meta) {
+        inputBuffer = inputBuffer.slice(0, cursorPos) + str + inputBuffer.slice(cursorPos);
+        cursorPos += str.length;
+        updateMenuStateAfterTyping();
+        renderSlashMenu();
+    }
+}
+
+function onRawData(chunk) {
+    if (chunk.length === 1 && chunk[0] === 27) {
+        handleEscapeKey();
+    }
+}
+
+// Readline Compatibility Object
+const rl = {
+    prompt: () => prompt(),
+    pause: () => {
+        if (process.stdin.isTTY && process.stdin.setRawMode) {
+            try { process.stdin.setRawMode(false); } catch(e) {}
+        }
+    },
+    resume: () => {
+        if (process.stdin.isTTY && process.stdin.setRawMode) {
+            try { process.stdin.setRawMode(true); } catch(e) {}
+        }
+        prompt();
+    }
+};
 
 // Robust Parser to extract tool calls from any LLM response text or markdown blocks
 function extractFallbackToolCalls(responseText) {
@@ -766,7 +1248,7 @@ async function runAgent(promptText) {
     renderDivider();
     isProcessing = false;
     currentAbortController = null;
-    rl.prompt();
+    await drainQueueOrPrompt();
 }
 
 // Interactive Slash Commands Handler
@@ -1012,15 +1494,16 @@ async function handleSlashCommand(input) {
     if (command === '/config' || command === '/settings') {
         const masked = activeModel.apiKey ? `${activeModel.apiKey.slice(0, 7)}...${activeModel.apiKey.slice(-6)}` : 'None';
         console.log(`\n${C.bold}Active Configuration:${C.reset}`);
-        console.log(`  Model:       ${C.green}${activeModel.name}${C.reset} (${activeModel.id})`);
-        console.log(`  Endpoint:    ${C.cyan}${activeModel.endpoint}${C.reset}`);
-        console.log(`  Provider:    ${activeModel.provider || 'auto'}`);
-        console.log(`  API Key:     ${masked}`);
-        console.log(`  Temperature: ${activeModel.temperature ?? 0.3}`);
-        console.log(`  Max Tokens:  ${activeModel.maxTokens ?? 4096}`);
-        console.log(`  Stream:      ${activeModel.stream ?? true}`);
-        console.log(`  Tools Count: ${tools.schemas.length}`);
-        console.log(`  Working Dir: ${process.cwd()}\n`);
+        console.log(`  Model:         ${C.green}${activeModel.name}${C.reset} (${activeModel.id})`);
+        console.log(`  Endpoint:      ${C.cyan}${activeModel.endpoint}${C.reset}`);
+        console.log(`  Provider:      ${activeModel.provider || 'auto'}`);
+        console.log(`  API Key:       ${masked}`);
+        console.log(`  Temperature:   ${activeModel.temperature ?? 0.3}`);
+        console.log(`  Max Tokens:    ${activeModel.maxTokens ?? 16384}`);
+        console.log(`  Context Limit: ${C.brightCyan}1,000,000,000 Tokens (1 Billion)${C.reset}`);
+        console.log(`  Stream:        ${activeModel.stream ?? true}`);
+        console.log(`  Tools Count:   ${tools.schemas.length}`);
+        console.log(`  Working Dir:   ${process.cwd()}\n`);
         return;
     }
 
@@ -1107,6 +1590,7 @@ async function handleSlashCommand(input) {
         console.log(`  Dedicated Directory: ${C.cyan}${currentSessionDir || 'None'}${C.reset}`);
         console.log(`  Memory File:         ${memPath} (${memSize})`);
         console.log(`  Messages in Memory:  ${chatHistory.length}`);
+        console.log(`  Context Limit:       ${C.brightCyan}1,000,000,000 Tokens (1 Billion)${C.reset}`);
         console.log(`  Active Model:        ${activeModel.name} (${activeModel.id})`);
         console.log(`  Models in Session:   ${currentSessionMeta?.modelsUsed?.join(', ') || activeModel.id}`);
         console.log(`  Active Skill:        ${activeSkillContext ? activeSkillContext.name : 'None'}`);
@@ -1171,23 +1655,6 @@ async function handleSlashCommand(input) {
     console.log(`\n${C.red}✖ Unknown command: ${command}${C.reset}. Type ${C.green}/help${C.reset} for available commands.\n`);
 }
 
-// Line Input Handler
-rl.on('line', async (line) => {
-    const cleanInput = line.trim();
-    if (!cleanInput) {
-        rl.prompt();
-        return;
-    }
-
-    if (cleanInput.startsWith('/')) {
-        await handleSlashCommand(cleanInput);
-        if (!isProcessing) rl.prompt();
-        return;
-    }
-
-    await runAgent(cleanInput);
-});
-
 // Non-Interactive / CLI Argument Handling
 async function main() {
     loadModels();
@@ -1212,7 +1679,7 @@ async function main() {
                     name: modelArg,
                     id: modelArg,
                     endpoint: activeModel?.endpoint || 'https://agentrouter.org',
-                    apiKey: activeModel?.apiKey || 'sk-xz0htv16oEc2XjwyYcd699XvyJ3IFtGXeUo5XTUk079H5Z5B',
+                    apiKey: activeModel?.apiKey || process.env.AGENTROUTER_API_KEY || process.env.API_KEY || '',
                     provider: 'agentrouter'
                 };
             }
@@ -1267,11 +1734,38 @@ async function main() {
         }
     }
 
-    // Interactive Mode
+    // Interactive Mode Setup
     console.clear();
     renderHeaderBanner();
-    rl.prompt();
+
+    if (process.stdin.isTTY) {
+        readline.emitKeypressEvents(process.stdin);
+        process.stdin.setRawMode(true);
+        process.stdin.on('keypress', onKeyPress);
+        process.stdin.on('data', onRawData);
+        prompt();
+    } else {
+        const fallbackRl = readline.createInterface({ input: process.stdin, output: process.stdout });
+        fallbackRl.on('line', async (line) => {
+            const clean = line.trim();
+            if (!clean) return;
+            if (clean.startsWith('/')) {
+                await handleSlashCommand(clean);
+                if (!isProcessing) prompt();
+            } else {
+                await runAgent(clean);
+            }
+        });
+    }
 }
+
+// Clean Terminal Exit Handler
+process.on('exit', () => {
+    if (process.stdin.isTTY && process.stdin.setRawMode) {
+        try { process.stdin.setRawMode(false); } catch(e) {}
+    }
+    process.stdout.write('\x1b[?25h');
+});
 
 main().catch(err => {
     console.error(`\n${C.red}Fatal initialization error: ${err.message}${C.reset}`);

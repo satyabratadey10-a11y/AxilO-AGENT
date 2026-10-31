@@ -79,7 +79,7 @@ def create_session():
     log(f"Failed to create session: {out} {err}")
     return False
 
-def update_models_json(new_endpoint, context_tokens=32768):
+def update_models_json(new_endpoint, context_tokens=1000000000):
     if not os.path.exists(MODELS_FILE):
         return
     try:
@@ -91,14 +91,15 @@ def update_models_json(new_endpoint, context_tokens=32768):
             if 'qwen' in m.get('id', '').lower() and 'colab' in m.get('name', '').lower():
                 m['endpoint'] = new_endpoint
                 m['contextTokens'] = context_tokens
-                m['maxTokens'] = 8192
-                m['options'] = {"num_ctx": context_tokens}
+                m['contextLimit'] = 1000000000
+                m['maxTokens'] = 16384
+                m['options'] = {"num_ctx": 32768}
                 updated = True
         
         if updated:
             with open(MODELS_FILE, 'w') as f:
                 json.dump(data, f, indent=2)
-            log(f"Successfully updated models.json with active endpoint: {new_endpoint} (Context: {context_tokens})")
+            log(f"Successfully updated models.json with active endpoint: {new_endpoint} (Context Limit: 1 Billion)")
     except Exception as e:
         log(f"Error updating models.json: {e}")
 
