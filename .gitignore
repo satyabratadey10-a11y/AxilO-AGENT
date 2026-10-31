@@ -23,6 +23,8 @@ npm-debug.log*
 
 # 6. Temporary Scratchpads
 fix_parser.js
+heartbeat.py
+__pycache__/
 
 # 7. OS Specific
 .DS_Store

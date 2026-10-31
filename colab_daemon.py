@@ -11,21 +11,46 @@ import json
 import os
 import re
 import sys
+import shutil
 import urllib.request
+import signal
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MODELS_FILE = os.path.join(BASE_DIR, 'models.json')
 SETUP_SCRIPT = os.path.join(BASE_DIR, 'setup_qwen_colab.py')
+HEARTBEAT_FILE = os.path.join(BASE_DIR, 'heartbeat.py')
 SESSION_NAME = 'qwen-t4'
-HEARTBEAT_FILE = '/tmp/heartbeat.py'
 
-# Write small heartbeat script to be executed in remote kernel
+# Ensure heartbeat script exists in permanent ~/.axilo/ directory (never in /tmp)
 with open(HEARTBEAT_FILE, 'w') as f:
-    f.write('import time, subprocess; print("[colab-heartbeat]", time.time())\n')
+    f.write('''import time
+try:
+    import torch
+    if torch.cuda.is_available():
+        _t = torch.zeros((1,), device="cuda")
+except Exception:
+    pass
+print(f"[colab-heartbeat] active at {time.strftime('%Y-%m-%d %H:%M:%S')}")
+''')
 
 def log(msg):
     timestamp = time.strftime('%Y-%m-%d %H:%M:%S')
     print(f"[{timestamp}] [ColabDaemon] {msg}", flush=True)
+
+def get_colab_bin():
+    colab = shutil.which("colab")
+    if colab:
+        return colab
+    for candidate in [
+        "/data/data/com.termux/files/usr/bin/colab",
+        "/usr/local/bin/colab",
+        "/usr/bin/colab"
+    ]:
+        if os.path.isfile(candidate) and os.access(candidate, os.X_OK):
+            return candidate
+    return "colab"
+
+COLAB_BIN = get_colab_bin()
 
 def run_cmd(cmd, timeout=120):
     try:
@@ -37,12 +62,17 @@ def run_cmd(cmd, timeout=120):
         return -1, '', str(e)
 
 def session_exists():
-    rc, out, _ = run_cmd("colab sessions", timeout=30)
-    return (rc == 0 and SESSION_NAME in out)
+    rc, out, _ = run_cmd(f"{COLAB_BIN} sessions", timeout=30)
+    if rc != 0:
+        return False
+    for line in out.splitlines():
+        if SESSION_NAME in line and "Pruned" not in line and "TERMINATED" not in line:
+            return True
+    return False
 
 def create_session():
     log(f"Creating new Colab session '{SESSION_NAME}' with Tesla T4 GPU...")
-    rc, out, err = run_cmd(f"colab new --session {SESSION_NAME} --gpu T4", timeout=60)
+    rc, out, err = run_cmd(f"{COLAB_BIN} new --session {SESSION_NAME} --gpu T4", timeout=90)
     if "Session READY" in out or session_exists():
         log(f"Colab session '{SESSION_NAME}' is READY.")
         return True
@@ -100,7 +130,7 @@ def setup_and_connect():
             return None
     
     log("Running setup_qwen_colab.py on Colab GPU...")
-    rc, out, err = run_cmd(f"colab exec -s {SESSION_NAME} -f {SETUP_SCRIPT} --timeout 600", timeout=660)
+    rc, out, err = run_cmd(f"{COLAB_BIN} exec -s {SESSION_NAME} -f {SETUP_SCRIPT} --timeout 600", timeout=660)
     log(f"Setup execution finished with code {rc}.")
     
     combined = out + "\n" + err
@@ -119,14 +149,14 @@ def setup_and_connect():
         return None
 
 def main():
-    log("Starting AxilO Colab Keepalive Daemon...")
+    log(f"Starting AxilO Colab Keepalive Daemon (using colab binary: {COLAB_BIN})...")
     current_endpoint = get_live_endpoint()
     
     if not test_endpoint(current_endpoint):
-        log(f"Current endpoint {current_endpoint} is offline. Initializing setup...")
+        log(f"Current endpoint '{current_endpoint}' is offline. Verifying session and initializing setup...")
         current_endpoint = setup_and_connect()
     else:
-        log(f"Current endpoint {current_endpoint} is verified ONLINE and active.")
+        log(f"Current endpoint '{current_endpoint}' is verified ONLINE and active.")
 
     log("Entering persistent heartbeat monitoring loop (30s interval)...")
     failure_count = 0
@@ -134,10 +164,21 @@ def main():
     while True:
         time.sleep(30)
         
-        # 1. Heartbeat to remote Colab kernel to prevent idle timeout
-        rc, _, _ = run_cmd(f"colab exec -s {SESSION_NAME} -f {HEARTBEAT_FILE} --timeout 40", timeout=45)
-        
-        # 2. Check public tunnel endpoint health
+        # 1. Verify remote session exists; if Google terminated it, trigger auto-recovery
+        if not session_exists():
+            log(f"Warning: Colab session '{SESSION_NAME}' no longer exists on server. Recovering...")
+            current_endpoint = setup_and_connect()
+            failure_count = 0
+            continue
+
+        # 2. Heartbeat to remote Colab kernel to keep kernel active and prevent idle timeout
+        rc, out, err = run_cmd(f"{COLAB_BIN} exec -s {SESSION_NAME} -f {HEARTBEAT_FILE} --timeout 40", timeout=45)
+        if rc == 0:
+            log(f"Heartbeat OK: {out.strip()}")
+        else:
+            log(f"Heartbeat warning (rc={rc}): {err.strip() or out.strip()}")
+
+        # 3. Check public tunnel endpoint health
         is_healthy = test_endpoint(current_endpoint)
         
         if is_healthy:

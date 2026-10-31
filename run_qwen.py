@@ -26,6 +26,7 @@ MODELS_FILE = os.path.join(AXILO_DIR, "models.json")
 SETUP_SCRIPT = os.path.join(AXILO_DIR, "setup_qwen_colab.py")
 DAEMON_SCRIPT = os.path.join(AXILO_DIR, "colab_daemon.py")
 DAEMON_LOG = os.path.join(AXILO_DIR, "daemon.log")
+HEARTBEAT_FILE = os.path.join(AXILO_DIR, "heartbeat.py")
 SESSION_NAME = "qwen-t4"
 DEFAULT_CONTEXT = 32768
 
@@ -220,7 +221,7 @@ def main():
         try:
             while True:
                 time.sleep(30)
-                run_cmd(f"{colab_bin} exec -s {SESSION_NAME} -f /tmp/heartbeat.py --timeout 40", timeout=45)
+                run_cmd(f"{colab_bin} exec -s {SESSION_NAME} -f {HEARTBEAT_FILE} --timeout 40", timeout=45)
                 print(f"[{time.strftime('%H:%M:%S')}] Heartbeat sent to {SESSION_NAME}.", flush=True)
         except KeyboardInterrupt:
             print(f"\nExiting foreground monitor. Daemon remains running in background.")

@@ -77,7 +77,6 @@ let currentSessionMeta = null;
 let activeSkillContext = null;
 let isProcessing = false;
 let currentAbortController = null;
-const CEILING_TURNS = 25;
 
 // Cogitating Spinner Engine
 class CogitationSpinner {
@@ -631,7 +630,8 @@ async function runAgent(promptText) {
     let turnsCounter = 0;
     let completed = false;
 
-    while (!completed && turnsCounter < CEILING_TURNS) {
+    // Continuous autonomous execution loop (unlimited turns until model completes or user cancels)
+    while (!completed) {
         turnsCounter++;
         let streamedFirstToken = false;
         let inThinkingMode = false;
@@ -761,10 +761,6 @@ async function runAgent(promptText) {
             completed = true;
             break;
         }
-    }
-
-    if (turnsCounter >= CEILING_TURNS) {
-        console.log(`\n${C.yellow}⚠ Max autonomous turn ceiling (${CEILING_TURNS}) reached.${C.reset}\n`);
     }
 
     renderDivider();
