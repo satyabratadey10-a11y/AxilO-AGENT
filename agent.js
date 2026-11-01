@@ -131,7 +131,7 @@ class CogitationSpinner {
 
 const spinner = new CogitationSpinner();
 
-// Load Config & Models
+// Load Models from models.json (Sole source of truth for models & credentials)
 function loadModels() {
     try {
         if (fs.existsSync(MODELS_FILE)) {
@@ -141,18 +141,10 @@ function loadModels() {
         availableModels = [];
     }
 
-    if (availableModels.length === 0) {
-        availableModels = [{
-            name: 'GPT-5.6 Sol (AgentRouter)',
-            id: 'gpt-5.6-sol',
-            endpoint: 'https://agentrouter.org',
-            apiKey: process.env.AGENTROUTER_API_KEY || process.env.API_KEY || '',
-            provider: 'agentrouter',
-            temperature: 0.3,
-            maxTokens: 4096,
-            stream: true
-        }];
-        fs.writeFileSync(MODELS_FILE, JSON.stringify(availableModels, null, 2));
+    if (!Array.isArray(availableModels) || availableModels.length === 0) {
+        console.error(`\n${C.red}✖ No models configured in ${MODELS_FILE}.${C.reset}`);
+        console.error(`  Please define your models and credentials in ~/.axilo/models.json or run: axilo --add-model\n`);
+        process.exit(1);
     }
     activeModel = { ...availableModels[0] };
 }
@@ -1675,13 +1667,9 @@ async function main() {
             if (found) {
                 activeModel = { ...found };
             } else {
-                activeModel = {
-                    name: modelArg,
-                    id: modelArg,
-                    endpoint: activeModel?.endpoint || 'https://agentrouter.org',
-                    apiKey: activeModel?.apiKey || process.env.AGENTROUTER_API_KEY || process.env.API_KEY || '',
-                    provider: 'agentrouter'
-                };
+                console.error(`\n${C.red}✖ Model "${modelArg}" not found in ${MODELS_FILE}.${C.reset}`);
+                console.error(`  Available models in models.json: ${availableModels.map(m => m.id).join(', ')}\n`);
+                process.exit(1);
             }
             i++;
         } else if (argv[i] === '--endpoint' && argv[i + 1]) {
