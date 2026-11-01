@@ -580,31 +580,30 @@ const PROMPT_STR = `${C.bold}${C.green}❯ ${C.reset}`;
 const PROMPT_WIDTH = 2;
 
 function clearPreviousMenu() {
-    if (lastRenderedMenuLines > 0) {
-        for (let i = 0; i < lastRenderedMenuLines; i++) {
-            process.stdout.write('\n\x1b[2K');
-        }
-        process.stdout.write(`\x1b[${lastRenderedMenuLines}A`);
-        lastRenderedMenuLines = 0;
-    }
+    readline.clearScreenDown(process.stdout);
+    lastRenderedMenuLines = 0;
 }
 
 function renderPromptLine() {
-    process.stdout.write('\r\x1b[2K');
-    process.stdout.write(PROMPT_STR + inputBuffer);
+    process.stdout.write('\r\x1b[2K' + PROMPT_STR + inputBuffer);
+    readline.clearScreenDown(process.stdout);
     readline.cursorTo(process.stdout, PROMPT_WIDTH + cursorPos);
 }
 
 function renderSlashMenu() {
-    clearPreviousMenu();
-    renderPromptLine();
+    // 1. Redraw prompt line in place
+    process.stdout.write('\r\x1b[2K' + PROMPT_STR + inputBuffer);
+    // 2. Erase any lines below the cursor without printing newlines
+    readline.clearScreenDown(process.stdout);
 
     if (!isMenuOpen || currentMatches.length === 0) {
+        lastRenderedMenuLines = 0;
+        readline.cursorTo(process.stdout, PROMPT_WIDTH + cursorPos);
         return;
     }
 
     const termWidth = process.stdout.columns || 80;
-    const maxVisible = Math.max(3, Math.min(6, (process.stdout.rows || 24) - 6));
+    const maxVisible = Math.max(3, Math.min(5, (process.stdout.rows || 24) - 6));
 
     if (menuSelectedIdx < menuScrollOffset) {
         menuScrollOffset = menuSelectedIdx;
@@ -630,18 +629,26 @@ function renderSlashMenu() {
         const isSelected = (actualIdx === menuSelectedIdx);
 
         const rawCmdPart = item.args ? `${item.name} ${item.args}` : item.name;
-        const padLen = Math.max(1, 26 - rawCmdPart.length);
+        // Keep command display compact so it never causes terminal line wrap
+        const cmdDisplay = rawCmdPart.length > 28 ? rawCmdPart.slice(0, 25) + '...' : rawCmdPart;
+        const padLen = Math.max(1, 30 - cmdDisplay.length);
         const padding = ' '.repeat(padLen);
-        const descPart = item.desc || '';
 
-        let lineText = '';
-        if (isSelected) {
-            lineText = `  ${C.cyan}${C.bold}❯ ${item.name}${C.reset}${item.args ? ' ' + C.dim + item.args + C.reset : ''}${padding}${C.white}${descPart}${C.reset}`;
-        } else {
-            lineText = `    ${C.green}${item.name}${C.reset}${item.args ? ' ' + C.dim + item.args + C.reset : ''}${padding}${C.gray}${descPart}${C.reset}`;
+        // Constrain description length strictly to remaining columns to guarantee 1 visual terminal row per item
+        const maxDescLen = Math.max(5, termWidth - 4 - cmdDisplay.length - padLen);
+        let descPart = item.desc || '';
+        if (descPart.length > maxDescLen) {
+            descPart = descPart.slice(0, Math.max(0, maxDescLen - 3)) + '...';
         }
 
-        process.stdout.write(`\n\x1b[2K${lineText}`);
+        let fullLine = '';
+        if (isSelected) {
+            fullLine = `  ${C.cyan}${C.bold}❯ ${item.name}${C.reset}${item.args ? ' ' + C.dim + item.args + C.reset : ''}${padding}${C.white}${descPart}${C.reset}`;
+        } else {
+            fullLine = `    ${C.green}${item.name}${C.reset}${item.args ? ' ' + C.dim + item.args + C.reset : ''}${padding}${C.gray}${descPart}${C.reset}`;
+        }
+
+        process.stdout.write(`\n\x1b[2K${fullLine}`);
         linesPrinted++;
     }
 
@@ -653,10 +660,11 @@ function renderSlashMenu() {
 
     lastRenderedMenuLines = linesPrinted;
 
+    // Restore cursor position back to prompt line and column
     if (linesPrinted > 0) {
         process.stdout.write(`\x1b[${linesPrinted}A`);
-        readline.cursorTo(process.stdout, PROMPT_WIDTH + cursorPos);
     }
+    readline.cursorTo(process.stdout, PROMPT_WIDTH + cursorPos);
 }
 
 function prompt() {
@@ -704,16 +712,14 @@ function handleEscapeKey() {
 
     if (isMenuOpen) {
         isMenuOpen = false;
-        clearPreviousMenu();
-        renderPromptLine();
+        renderSlashMenu();
         return;
     }
 
     if (inputBuffer.length > 0) {
-        clearPreviousMenu();
         inputBuffer = '';
         cursorPos = 0;
-        renderPromptLine();
+        renderSlashMenu();
     }
 }
 
@@ -900,8 +906,7 @@ async function onKeyPress(str, key) {
                 inputBuffer = chosen.name + ' ';
                 cursorPos = inputBuffer.length;
                 isMenuOpen = false;
-                clearPreviousMenu();
-                renderPromptLine();
+                renderSlashMenu();
             }
         }
         return;
@@ -1172,8 +1177,20 @@ async function runAgent(promptText) {
                 } catch(err) {}
             }
 
-            // If no tool calls were made, the assistant is done
+            // If no tool calls were made, check if generation was truncated mid-air
             if (toolCalls.length === 0) {
+                const trimmed = responseText.trim();
+                const isTruncated = (result.finishReason === 'length' || result.finishReason === 'max_tokens' ||
+                    (trimmed.length > 50 && !trimmed.match(/([.?!:}\]"'`\*\-_]|\n\n)$/)));
+
+                if (isTruncated && turnsCounter < 30) {
+                    process.stdout.write(`\n${C.yellow}⚠ Output reached generation limit. Seamlessly continuing...${C.reset}\n`);
+                    chatHistory.push({ role: 'assistant', content: responseText });
+                    chatHistory.push({ role: 'user', content: 'Continue generating exactly from where you stopped without repeating.' });
+                    saveSession();
+                    continue;
+                }
+
                 if (!streamedFirstToken && responseText) {
                     console.log(`\n${responseText}\n`);
                 }

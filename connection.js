@@ -5,11 +5,16 @@
 
 const crypto = require('crypto');
 
-// Initialize 60s connect timeout via Undici if available
+// Initialize extended connect and stream timeouts via Undici if available
 try {
     const undiciPath = '/data/data/com.termux/files/usr/lib/node_modules/npm/node_modules/undici';
     const { Agent, setGlobalDispatcher } = require(undiciPath);
-    setGlobalDispatcher(new Agent({ connect: { timeout: 60000 } }));
+    setGlobalDispatcher(new Agent({
+        connect: { timeout: 120000 },
+        headersTimeout: 300000,
+        bodyTimeout: 300000,
+        keepAliveTimeout: 60000
+    }));
 } catch (e) {
     // Fall back to default global fetch dispatcher
 }
@@ -24,6 +29,27 @@ function generateUUID() {
 function capTools(toolList, max = 128) {
     if (!toolList || !Array.isArray(toolList)) return [];
     return toolList.slice(0, max);
+}
+
+// Compact older tool observation dumps (older than last 4 messages) to prevent context exhaustion
+function compactHistoryForContext(history) {
+    if (!history || history.length <= 4) return history;
+    const len = history.length;
+    return history.map((msg, idx) => {
+        if (msg.role === 'tool' && idx < len - 4) {
+            const contentStr = typeof msg.content === 'string' ? msg.content : JSON.stringify(msg.content);
+            if (contentStr.length > 2000) {
+                const head = contentStr.slice(0, 1000);
+                const tail = contentStr.slice(-500);
+                const omitted = contentStr.length - 1500;
+                return {
+                    ...msg,
+                    content: `${head}\n\n[... Truncated ${omitted} characters of older observation for context efficiency ...]\n\n${tail}`
+                };
+            }
+        }
+        return msg;
+    });
 }
 
 /**
@@ -57,7 +83,8 @@ async function callAI({ activeModel, chatHistory = [], promptText, SYSTEM_PROMPT
         }
     }
 
-    const fullHistory = promptText ? [...chatHistory, { role: 'user', content: promptText }] : [...chatHistory];
+    const rawHistory = promptText ? [...chatHistory, { role: 'user', content: promptText }] : [...chatHistory];
+    const fullHistory = compactHistoryForContext(rawHistory);
     const cappedTools = capTools(tools, 128);
 
     // =========================================================================
@@ -566,10 +593,12 @@ async function callAI({ activeModel, chatHistory = [], promptText, SYSTEM_PROMPT
             stream: !!activeModel.stream
         };
 
-        // Pass options (e.g. num_ctx) for Ollama / Colab OpenAI compatibility endpoint
-        if (activeModel.options || activeModel.contextTokens || activeModel.num_ctx) {
-            body.options = activeModel.options || {
-                num_ctx: activeModel.contextTokens || activeModel.num_ctx || 32768
+        // Pass options (e.g. num_ctx, num_predict) for Ollama / Colab OpenAI compatibility endpoint
+        if (activeModel.options || activeModel.contextTokens || activeModel.num_ctx || activeModel.maxTokens) {
+            body.options = {
+                num_ctx: activeModel.options?.num_ctx || activeModel.num_ctx || 32768,
+                num_predict: activeModel.maxTokens || 16384,
+                ...(activeModel.options || {})
             };
         }
 
@@ -605,6 +634,7 @@ async function callAI({ activeModel, chatHistory = [], promptText, SYSTEM_PROMPT
 
         if (activeModel.stream && response.body) {
             let fullText = '';
+            let finishReason = null;
             const toolCallsMap = {};
 
             const reader = response.body.getReader();
@@ -626,7 +656,9 @@ async function callAI({ activeModel, chatHistory = [], promptText, SYSTEM_PROMPT
 
                     try {
                         const parsed = JSON.parse(rawData);
-                        const delta = parsed.choices?.[0]?.delta;
+                        const choice = parsed.choices?.[0];
+                        if (choice?.finish_reason) finishReason = choice.finish_reason;
+                        const delta = choice?.delta;
                         if (!delta) continue;
 
                         const thinkingChunk = delta.reasoning || delta.reasoning_content || delta.thinking;
@@ -659,10 +691,11 @@ async function callAI({ activeModel, chatHistory = [], promptText, SYSTEM_PROMPT
                 return { id: t.id, name: t.name, args };
             });
 
-            return { text: fullText, toolCalls, raw: null };
+            return { text: fullText, toolCalls, finishReason, raw: null };
         } else {
             const json = await response.json();
             const choice = json.choices?.[0]?.message;
+            const finishReason = json.choices?.[0]?.finish_reason || null;
             const fullText = choice?.content || '';
             const toolCalls = [];
 
@@ -675,7 +708,7 @@ async function callAI({ activeModel, chatHistory = [], promptText, SYSTEM_PROMPT
             }
 
             if (onToken && fullText) onToken(fullText);
-            return { text: fullText, toolCalls, raw: json };
+            return { text: fullText, toolCalls, finishReason, raw: json };
         }
     }
 
